@@ -36,6 +36,15 @@ casconf --discovery-config ./casconf.yaml --output config.json
 
 # Specify discovery configuration via environment variable
 CASCONF_DISCOVERY=./casconf.yaml casconf
+
+# Host/environment-specific config using environment variable expansion in paths
+# Directory paths in casconf.yaml support $VAR expansion, e.g.:
+#   directories:
+#     - /etc/myapp/defaults
+#     - /etc/myapp/$ENVIRONMENT   # resolved at runtime
+#     - ~/.config/myapp
+export ENVIRONMENT=production
+casconf --discovery-config ./casconf.yaml --output ./merged.json
 ```
 
 ```python
@@ -113,9 +122,10 @@ CasConf uses a discovery configuration file to determine where to search for con
 ```yaml
 # casconf.yaml
 directories:
-  - /etc/myapp
-  - ~/.config/myapp
-  - ./config
+  - /etc/myapp/defaults        # site-wide defaults
+  - /etc/myapp/$ENVIRONMENT    # environment-specific overrides, e.g. production, staging
+  - /etc/myapp/$HOSTNAME       # host-specific overrides, e.g. web-01.example.com
+  - ~/.config/myapp            # user overrides (highest priority)
 
 patterns:
   - "config.json"
@@ -124,6 +134,8 @@ patterns:
 
 merge_strategy: deep  # or 'shallow'
 ```
+
+Directory paths support `~` expansion and `$VAR` / `${VAR}` environment variable expansion. Missing directories are skipped with a warning — no error is raised. See [USAGE.md](USAGE.md) for a full walkthrough.
 
 ## License
 
