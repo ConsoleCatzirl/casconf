@@ -1,5 +1,5 @@
 """Tests targeting coverage gaps in merger, discovery, parser,
-registry, cli, and the public __init__ API."""
+registry, cli, and the public API."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 # ---------------------------------------------------------------------------
-# cascconf/__init__.py  (merge_configs / validate_config)
+# cascconf/api.py  (merge_configs / validate_config)
 # ---------------------------------------------------------------------------
 
 
 class TestMergeConfigsPublicApi:
-    """Covers cascconf/__init__.py lines 86-105."""
+    """Covers cascconf/api.py merge_configs and validate_config."""
 
     def test_returns_dict_when_no_output(self, tmp_path):
         """merge_configs() returns dict when output=None."""
@@ -142,7 +142,7 @@ class TestDiscoveryConfigFromFile:
         # Valid YAML but missing required keys triggers CascConfConfigError
         # via from_dict, not the parser; use truly unparseable YAML
         p.write_text(
-            "directories: [/tmp\npatterns: [\n",
+            "directories: ['/tmp']\npatterns: [\n",
             encoding="utf-8",
         )
         with pytest.raises(CascConfConfigError):
@@ -353,3 +353,74 @@ class TestCliRunWithDiscoveryConfigObject:
         result = run(discovery_config=dc)
         assert isinstance(result, dict)
         assert "database" in result
+
+
+# ---------------------------------------------------------------------------
+# Third-level fixture key
+# ---------------------------------------------------------------------------
+
+
+class TestThirdLevelFixtureKey:
+    """Fixture base/config.json has a three-level key; verify it survives
+    deep-merge when override does not touch it."""
+
+    def test_third_level_key_preserved_after_deep_merge(
+        self, tmp_path, capsys
+    ):
+        """database.credentials.username survives a deep merge with
+        an override that only changes database.port."""
+        import json
+        import yaml
+
+        from cascconf.cli import main
+
+        dc = tmp_path / "cascconf.yaml"
+        dc.write_text(
+            yaml.dump(
+                {
+                    "directories": [
+                        str(FIXTURES / "base"),
+                        str(FIXTURES / "override"),
+                    ],
+                    "patterns": ["config.*"],
+                }
+            ),
+            encoding="utf-8",
+        )
+        rc = main(["--discovery-config", str(dc)])
+        assert rc == 0
+        data = json.loads(capsys.readouterr().out)
+        # Third-level key from base should survive merge
+        assert data["database"]["credentials"]["username"] == "admin"
+        # Override still wins for the port
+        assert data["database"]["port"] == 5433
+
+
+# ---------------------------------------------------------------------------
+# _get_version uses PackageNotFoundError
+# ---------------------------------------------------------------------------
+
+
+class TestGetVersion:
+    """_get_version falls back gracefully when package is not found."""
+
+    def test_returns_fallback_on_package_not_found(self, monkeypatch):
+        from importlib.metadata import PackageNotFoundError
+
+        def raise_not_found(name: str) -> str:
+            raise PackageNotFoundError(name)
+
+        monkeypatch.setattr(
+            "importlib.metadata.version",
+            raise_not_found,
+        )
+        from cascconf.cli import _get_version
+
+        assert _get_version() == "cascconf (version unknown)"
+
+    def test_returns_version_string_when_installed(self):
+        from cascconf.cli import _get_version
+
+        v = _get_version()
+        assert v.startswith("cascconf ")
+

@@ -99,12 +99,19 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _get_version() -> str:
-    """Return the installed package version string."""
+    """Return the installed package version string.
+
+    Uses :func:`importlib.metadata.version` to read the version that
+    pbr wrote into the package metadata at install time.  Falls back
+    to a placeholder string when the package is not installed (e.g.
+    when running directly from a source checkout without ``pip install
+    -e .``).
+    """
     try:
-        from importlib.metadata import version
+        from importlib.metadata import PackageNotFoundError, version
 
         return f"cascconf {version('cascconf')}"
-    except Exception:  # noqa: BLE001
+    except PackageNotFoundError:
         return "cascconf (version unknown)"
 
 
