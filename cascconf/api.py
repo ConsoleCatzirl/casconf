@@ -68,14 +68,10 @@ def merge_configs(
     logging.getLogger("cascconf").setLevel(log_level)
 
     if discovery_config is None:
-        discovery_config = os.environ.get(
-            _ENV_DISCOVERY, _DEFAULT_DISCOVERY
-        )
+        discovery_config = os.environ.get(_ENV_DISCOVERY, _DEFAULT_DISCOVERY)
 
     if not isinstance(discovery_config, DiscoveryConfig):
-        discovery_config = DiscoveryConfig.from_file(
-            Path(discovery_config)
-        )
+        discovery_config = DiscoveryConfig.from_file(Path(discovery_config))
 
     paths = discover(discovery_config)
     configs = [parse(p) for p in paths]

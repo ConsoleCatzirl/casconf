@@ -162,7 +162,7 @@ pipenv run sort-imports-check
 
 ### Style Rules
 
-- **Line length**: 79 characters maximum.
+- **Line length**: 127 characters maximum.
 - **Imports**: Grouped as stdlib → third-party → local, separated by blank lines.
 - **Type hints**: Required for all public functions and methods.
 - **Docstrings**: Required for all public modules, classes, and functions.

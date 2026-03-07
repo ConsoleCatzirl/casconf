@@ -39,10 +39,7 @@ def merge(
         ValueError: If *strategy* is not a recognised value.
     """
     if strategy not in _VALID_STRATEGIES:
-        raise ValueError(
-            f"Unknown merge strategy {strategy!r}. "
-            f"Must be one of: {sorted(_VALID_STRATEGIES)}"
-        )
+        raise ValueError(f"Unknown merge strategy {strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}")
 
     if not configs:
         return {}
@@ -81,10 +78,9 @@ def deep_merge(
         elif isinstance(base_value, list) and isinstance(value, list):
             result[key] = base_value + value
         else:
-            if key in result and type(base_value) != type(value):
+            if key in result and type(base_value) is not type(value):
                 logger.warning(
-                    "Type conflict at key %r: "
-                    "%s overrides %s",
+                    "Type conflict at key %r: %s overrides %s",
                     key,
                     type(value).__name__,
                     type(base_value).__name__,

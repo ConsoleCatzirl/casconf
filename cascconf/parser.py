@@ -78,7 +78,6 @@ def parse(path: Path) -> dict[str, Any]:
             last_exc = exc
 
     raise CascConfParseError(
-        f"No parser could read {path}"
-        + (f": {last_exc}" if last_exc else ""),
+        f"No parser could read {path}" + (f": {last_exc}" if last_exc else ""),
         path,
     )

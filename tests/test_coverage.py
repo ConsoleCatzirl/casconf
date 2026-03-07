@@ -3,8 +3,6 @@ registry, cli, and the public API."""
 
 from __future__ import annotations
 
-import json
-import os
 from pathlib import Path
 
 import pytest
@@ -23,6 +21,7 @@ class TestMergeConfigsPublicApi:
     def test_returns_dict_when_no_output(self, tmp_path):
         """merge_configs() returns dict when output=None."""
         import yaml
+
         from cascconf import merge_configs
 
         dc = tmp_path / "cascconf.yaml"
@@ -42,6 +41,7 @@ class TestMergeConfigsPublicApi:
     def test_writes_file_and_returns_none(self, tmp_path):
         """merge_configs() returns None when output is given."""
         import yaml
+
         from cascconf import merge_configs
 
         dc = tmp_path / "cascconf.yaml"
@@ -55,17 +55,14 @@ class TestMergeConfigsPublicApi:
             encoding="utf-8",
         )
         out = tmp_path / "merged.json"
-        result = merge_configs(
-            discovery_config=str(dc), output=str(out)
-        )
+        result = merge_configs(discovery_config=str(dc), output=str(out))
         assert result is None
         assert out.exists()
 
-    def test_uses_env_var_when_discovery_config_is_none(
-        self, tmp_path, monkeypatch
-    ):
+    def test_uses_env_var_when_discovery_config_is_none(self, tmp_path, monkeypatch):
         """merge_configs(None) uses CASCCONF_DISCOVERY env var."""
         import yaml
+
         from cascconf import merge_configs
 
         dc = tmp_path / "env.yaml"
@@ -128,12 +125,8 @@ class TestDiscoveryConfigEquality:
     def test_eq_same_values_returns_true(self):
         from cascconf.discovery import DiscoveryConfig
 
-        dc1 = DiscoveryConfig(
-            directories=["/tmp"], patterns=["*.json"]
-        )
-        dc2 = DiscoveryConfig(
-            directories=["/tmp"], patterns=["*.json"]
-        )
+        dc1 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        dc2 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
         assert dc1 == dc2
 
     def test_eq_different_strategy_returns_false(self):
@@ -161,9 +154,7 @@ class TestDiscoverPathNotDir:
         # Use a regular file as a directory — should be warned and skipped
         f = tmp_path / "not_a_dir.json"
         f.write_text("{}", encoding="utf-8")
-        dc = DiscoveryConfig(
-            directories=[str(f)], patterns=["*.json"]
-        )
+        dc = DiscoveryConfig(directories=[str(f)], patterns=["*.json"])
         found = discover(dc)
         assert found == []
 
@@ -274,9 +265,7 @@ class TestRegistryOptionalDepErrors:
 
         f = tmp_path / "config.yaml"
         f.write_text("key: value\n", encoding="utf-8")
-        monkeypatch.setattr(
-            builtins, "__import__", self._blocking_import("yaml")
-        )
+        monkeypatch.setattr(builtins, "__import__", self._blocking_import("yaml"))
         with pytest.raises(ImportError, match="cascconf\\[yaml\\]"):
             reg_module._parse_yaml(f)
 
@@ -286,9 +275,7 @@ class TestRegistryOptionalDepErrors:
 
         import cascconf.registry as reg_module
 
-        monkeypatch.setattr(
-            builtins, "__import__", self._blocking_import("yaml")
-        )
+        monkeypatch.setattr(builtins, "__import__", self._blocking_import("yaml"))
         with pytest.raises(ImportError, match="cascconf\\[yaml\\]"):
             reg_module._write_yaml({"k": "v"}, io.StringIO())
 
@@ -298,12 +285,9 @@ class TestRegistryOptionalDepErrors:
 
         import cascconf.registry as reg_module
 
-        monkeypatch.setattr(
-            builtins, "__import__", self._blocking_import("tomli_w")
-        )
+        monkeypatch.setattr(builtins, "__import__", self._blocking_import("tomli_w"))
         with pytest.raises(ImportError, match="cascconf\\[toml\\]"):
             reg_module._write_toml({"k": "v"}, io.StringIO())
-
 
 
 class TestCliConfigureLogging:
@@ -327,9 +311,7 @@ class TestCliConfigureLogging:
 class TestCliUnexpectedException:
     """Covers cli.py lines 204-209 (bare except branch)."""
 
-    def test_unexpected_exception_returns_1(
-        self, tmp_path, monkeypatch
-    ):
+    def test_unexpected_exception_returns_1(self, tmp_path, monkeypatch):
         import yaml
 
         from cascconf import cli
@@ -352,9 +334,7 @@ class TestCliUnexpectedException:
         monkeypatch.setattr(
             cli_module,
             "write",
-            lambda *a, **kw: (_ for _ in ()).throw(
-                RuntimeError("unexpected")
-            ),
+            lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("unexpected")),
         )
 
         rc = cli.main(["--discovery-config", str(dc)])
@@ -386,12 +366,11 @@ class TestThirdLevelFixtureKey:
     """Fixture base/config.json has a three-level key; verify it survives
     deep-merge when override does not touch it."""
 
-    def test_third_level_key_preserved_after_deep_merge(
-        self, tmp_path, capsys
-    ):
+    def test_third_level_key_preserved_after_deep_merge(self, tmp_path, capsys):
         """database.credentials.username survives a deep merge with
         an override that only changes database.port."""
         import json
+
         import yaml
 
         from cascconf.cli import main
@@ -445,4 +424,3 @@ class TestGetVersion:
 
         v = _get_version()
         assert v.startswith("cascconf ")
-

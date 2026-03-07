@@ -5,8 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from cascconf.cli import _build_parser, main
 
 # Path to the test fixtures directory
@@ -70,9 +68,7 @@ class TestArgumentParser:
 class TestMainCli:
     """main() end-to-end tests."""
 
-    def test_merges_single_json_config_to_stdout(
-        self, tmp_path, capsys
-    ):
+    def test_merges_single_json_config_to_stdout(self, tmp_path, capsys):
         dc = _make_discovery_yaml(
             tmp_path,
             dirs=[str(FIXTURES / "base")],

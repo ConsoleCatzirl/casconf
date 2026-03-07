@@ -59,23 +59,15 @@ class DiscoveryConfig:
                 *directories*/*patterns* are empty.
         """
         if not directories:
-            raise CascConfConfigError(
-                "'directories' must contain at least one entry."
-            )
+            raise CascConfConfigError("'directories' must contain at least one entry.")
         if not patterns:
-            raise CascConfConfigError(
-                "'patterns' must contain at least one entry."
-            )
+            raise CascConfConfigError("'patterns' must contain at least one entry.")
         if merge_strategy not in _VALID_STRATEGIES:
             raise CascConfConfigError(
-                f"Invalid merge_strategy {merge_strategy!r}. "
-                f"Must be one of: {sorted(_VALID_STRATEGIES)}"
+                f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}"
             )
 
-        self.directories: list[Path] = [
-            Path(os.path.expandvars(os.path.expanduser(str(d))))
-            for d in directories
-        ]
+        self.directories: list[Path] = [Path(os.path.expandvars(os.path.expanduser(str(d)))) for d in directories]
         self.patterns: list[str] = list(patterns)
         self.merge_strategy: str = merge_strategy
 
@@ -101,21 +93,14 @@ class DiscoveryConfig:
 
         resolved = Path(path).expanduser().resolve()
         if not resolved.exists():
-            raise CascConfConfigError(
-                f"Discovery configuration file not found: {resolved}"
-            )
+            raise CascConfConfigError(f"Discovery configuration file not found: {resolved}")
         parser = registry.get_parser(resolved.suffix)
         if parser is None:
-            raise CascConfConfigError(
-                f"Unsupported discovery configuration format: "
-                f"{resolved.suffix!r}"
-            )
+            raise CascConfConfigError(f"Unsupported discovery configuration format: {resolved.suffix!r}")
         try:
             data: dict[str, Any] = parser(resolved)
         except Exception as exc:
-            raise CascConfConfigError(
-                f"Failed to read discovery configuration: {exc}"
-            ) from exc
+            raise CascConfConfigError(f"Failed to read discovery configuration: {exc}") from exc
         return cls.from_dict(data)
 
     @classmethod
@@ -134,10 +119,7 @@ class DiscoveryConfig:
         """
         for key in ("directories", "patterns"):
             if key not in data:
-                raise CascConfConfigError(
-                    f"Missing required key in discovery "
-                    f"configuration: {key!r}"
-                )
+                raise CascConfConfigError(f"Missing required key in discovery configuration: {key!r}")
         return cls(
             directories=data["directories"],
             patterns=data["patterns"],
@@ -218,8 +200,7 @@ def discover(config: DiscoveryConfig) -> list[Path]:
                         seen.add(match)
 
     logger.info(
-        "Discovery complete: %d file(s) found across "
-        "%d director(ies) using %d pattern(s)",
+        "Discovery complete: %d file(s) found across %d director(ies) using %d pattern(s)",
         len(found),
         len(config.directories),
         len(config.patterns),

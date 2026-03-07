@@ -86,9 +86,7 @@ class TestDiscoveryConfigFromDict:
             DiscoveryConfig.from_dict({"directories": ["/tmp"]})
 
     def test_merge_strategy_defaults_to_deep(self):
-        dc = DiscoveryConfig.from_dict(
-            {"directories": ["/tmp"], "patterns": ["*.json"]}
-        )
+        dc = DiscoveryConfig.from_dict({"directories": ["/tmp"], "patterns": ["*.json"]})
         assert dc.merge_strategy == "deep"
 
 

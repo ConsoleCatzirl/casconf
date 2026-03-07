@@ -32,10 +32,7 @@ def _build_parser() -> argparse.ArgumentParser:
     """Build and return the CLI argument parser."""
     parser = argparse.ArgumentParser(
         prog="cascconf",
-        description=(
-            "Deep-merge configuration files across multiple "
-            "directories following a cascading pattern."
-        ),
+        description="Deep-merge configuration files across multiple directories following a cascading pattern.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Output goes to stdout by default; pipe to other tools "
@@ -51,19 +48,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "--discovery-config",
         metavar="FILE",
         default=os.environ.get(_ENV_DISCOVERY, _DEFAULT_DISCOVERY),
-        help=(
-            "Path to the discovery configuration file "
-            f"(default: {_DEFAULT_DISCOVERY!r}, or "
-            f"${_ENV_DISCOVERY})"
-        ),
+        help=(f"Path to the discovery configuration file (default: {_DEFAULT_DISCOVERY!r}, or ${_ENV_DISCOVERY})"),
     )
     parser.add_argument(
         "--output",
         metavar="FILE",
         default=None,
-        help=(
-            "Write merged configuration to FILE instead of stdout."
-        ),
+        help=("Write merged configuration to FILE instead of stdout."),
     )
     parser.add_argument(
         "--format",
@@ -71,9 +62,7 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="FORMAT",
         default=_DEFAULT_FORMAT,
         choices=["json", "yaml", "toml"],
-        help=(
-            "Output format: json (default), yaml, or toml."
-        ),
+        help=("Output format: json (default), yaml, or toml."),
     )
     parser.add_argument(
         "--verbose",
@@ -145,10 +134,9 @@ def main(argv: list[str] | None = None) -> int:
         merged = merge_configs(
             discovery_config=args.discovery_config,
             output_format=args.output_format,
-            log_level=(
-                logging.DEBUG if args.verbose else logging.WARNING
-            ),
+            log_level=(logging.DEBUG if args.verbose else logging.WARNING),
         )
+        assert merged is not None
         write(merged, output=args.output, fmt=args.output_format)
     except CascConfError as exc:
         logging.getLogger("cascconf").error("%s", exc)

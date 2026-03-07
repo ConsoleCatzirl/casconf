@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 # Type aliases
 ParserFn = Callable[[Path], dict[str, Any]]
@@ -45,9 +45,7 @@ class Registry:
     # Parser registration / lookup
     # ------------------------------------------------------------------
 
-    def register_parser(
-        self, extension: str, fn: ParserFn
-    ) -> None:
+    def register_parser(self, extension: str, fn: ParserFn) -> None:
         """Register a parser callable for the given file extension.
 
         Args:
@@ -125,10 +123,7 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
     try:
         import yaml  # pyyaml
     except ImportError as exc:
-        raise ImportError(
-            "YAML support requires the 'pyyaml' package. "
-            "Install it with: pip install cascconf[yaml]"
-        ) from exc
+        raise ImportError("YAML support requires the 'pyyaml' package. Install it with: pip install cascconf[yaml]") from exc
 
     text = path.read_text(encoding="utf-8")
     if not text.strip():
@@ -140,17 +135,16 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
 def _parse_toml(path: Path) -> dict[str, Any]:
     """Parse a TOML file and return a dict."""
     try:
-        import tomllib  # Python 3.11+
+        import tomllib  # type: ignore[import-not-found]  # Python 3.11+
     except ImportError:
         try:
-            import tomli as tomllib  # type: ignore[no-redef]
+            import tomli as tomllib
         except ImportError as exc:
             raise ImportError(
-                "TOML support on Python <3.11 requires the 'tomli' "
-                "package. Install it with: pip install cascconf[toml]"
+                "TOML support on Python <3.11 requires the 'tomli' package. Install it with: pip install cascconf[toml]"
             ) from exc
 
-    return tomllib.loads(path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], tomllib.loads(path.read_text(encoding="utf-8")))
 
 
 def _parse_ini(path: Path) -> dict[str, Any]:
@@ -184,8 +178,7 @@ def _write_yaml(data: dict[str, Any], stream: io.TextIOBase) -> None:
         import yaml  # pyyaml
     except ImportError as exc:
         raise ImportError(
-            "YAML support requires the 'pyyaml' package. "
-            "Install it with: pip install cascconf[yaml]"
+            "YAML support requires the 'pyyaml' package. " "Install it with: pip install cascconf[yaml]"
         ) from exc
 
     yaml.dump(
@@ -203,8 +196,7 @@ def _write_toml(data: dict[str, Any], stream: io.TextIOBase) -> None:
         import tomli_w
     except ImportError as exc:
         raise ImportError(
-            "TOML write support requires the 'tomli-w' package. "
-            "Install it with: pip install cascconf[toml]"
+            "TOML write support requires the 'tomli-w' package. Install it with: pip install cascconf[toml]"
         ) from exc
 
     stream.write(tomli_w.dumps(data))

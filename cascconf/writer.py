@@ -41,10 +41,7 @@ def write(
     """
     writer_fn = registry.get_writer(fmt.lower())
     if writer_fn is None:
-        raise CascConfWriteError(
-            f"Unsupported output format {fmt!r}. "
-            f"Supported: {registry.supported_formats}"
-        )
+        raise CascConfWriteError(f"Unsupported output format {fmt!r}. Supported: {registry.supported_formats}")
 
     if output is None:
         logger.debug("Writing %s output to stdout", fmt)
@@ -56,10 +53,8 @@ def write(
         dest.parent.mkdir(parents=True, exist_ok=True)
         with dest.open("w", encoding="utf-8") as fh:
             logger.debug("Writing %s output to %s", fmt, dest)
-            writer_fn(data, fh)  # type: ignore[arg-type]
+            writer_fn(data, fh)
     except OSError as exc:
-        raise CascConfWriteError(
-            f"Failed to write output to {dest}: {exc}"
-        ) from exc
+        raise CascConfWriteError(f"Failed to write output to {dest}: {exc}") from exc
 
     logger.info("Output written to %s", dest)
