@@ -22,43 +22,6 @@ CasConf scans a configurable list of directories for matching configuration file
 - Multi-tenant configuration management
 - Dotfile management and system configuration
 
-## Quick Start
-
-```bash
-# Install
-pip install casconf
-
-# Basic usage - merge configs and output to stdout
-casconf --discovery-config ./casconf.yaml
-
-# Output to a file
-casconf --discovery-config ./casconf.yaml --output config.json
-
-# Specify discovery configuration via environment variable
-CASCONF_DISCOVERY=./casconf.yaml casconf
-
-# Host/environment-specific config using environment variable expansion in paths
-# Directory paths in casconf.yaml support $VAR expansion, e.g.:
-#   directories:
-#     - /etc/myapp/defaults
-#     - /etc/myapp/$ENVIRONMENT   # resolved at runtime
-#     - ~/.config/myapp
-export ENVIRONMENT=production
-casconf --discovery-config ./casconf.yaml --output ./merged.json
-```
-
-```python
-# Use as a library
-from casconf import merge_configs
-
-config = merge_configs(discovery_config='./casconf.yaml')
-
-# Or write directly to file
-merge_configs(discovery_config='./casconf.yaml', output='./merged.json')
-```
-
-See [USAGE.md](USAGE.md) for detailed examples.
-
 ## Documentation
 
 - [USAGE.md](USAGE.md) - Getting started guide with examples
@@ -83,20 +46,22 @@ pip install git+https://github.com/ConsoleCatzirl/casconf.git@main
 
 ```bash
 # Merge configs and output to stdout (default)
-casconf
+casconf --discovery-config ./casconf.yaml
 
 # Output to a file
-casconf --output ./config.json
+casconf --discovery-config ./casconf.yaml --output ./merged.json
 
-# Specify configuration file format for stdout
-casconf --format yaml
+# Specify output format
+casconf --discovery-config ./casconf.yaml --format yaml
 
-# Use custom discovery configuration
-casconf --discovery-config ./custom-discovery.yaml --output ./merged.json
+# Configure with environment variables
+export CASCONF_DISCOVERY=./casconf.yaml
+export CASCONF_OUTPUT=./merged.json
+export CASCONF_FORMAT=json
+casconf
 
 # Pipe to other tools
 casconf | jq '.database'
-casconf --format yaml | grep "host:"
 ```
 
 ### Library Usage
