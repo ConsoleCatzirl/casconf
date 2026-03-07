@@ -1,0 +1,16 @@
+CHANGES
+=======
+
+0.1.0 (Unreleased)
+------------------
+
+* Initial project specification and documentation
+* Added README.md with project overview
+* Added QUICKSTART.md with getting started guide
+* Added ARCHITECTURE.md with system design
+* Added DESIGN.md with design decisions and rationale
+* Added CONTRIBUTING.md with contribution guidelines
+* Added API.md with library API reference
+* Added dual MIT/GPL-3.0 license
+* Set up pbr for build and version management
+* Set up Pipenv for dependency management
