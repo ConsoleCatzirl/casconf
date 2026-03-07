@@ -138,6 +138,47 @@ class TestMerge:
         assert result == {"a": 1, "b": 2, "c": 3}
 
 
+class TestMergeListStrategy:
+    """Tests for the list_strategy parameter in merge() and deep_merge()."""
+
+    def test_append_is_default(self):
+        result = deep_merge({"items": [1, 2]}, {"items": [3]})
+        assert result["items"] == [1, 2, 3]
+
+    def test_replace_list_strategy(self):
+        result = deep_merge({"items": [1, 2]}, {"items": [3]}, list_strategy="replace")
+        assert result["items"] == [3]
+
+    def test_append_list_strategy_explicit(self):
+        result = deep_merge({"items": [1, 2]}, {"items": [3]}, list_strategy="append")
+        assert result["items"] == [1, 2, 3]
+
+    def test_replace_list_strategy_nested(self):
+        base = {"a": {"items": [1, 2]}}
+        override = {"a": {"items": [3]}}
+        result = deep_merge(base, override, list_strategy="replace")
+        assert result["a"]["items"] == [3]
+
+    def test_merge_replace_list_strategy(self):
+        configs = [{"plugins": ["auth", "cache"]}, {"plugins": ["metrics"]}]
+        result = merge(configs, list_strategy="replace")
+        assert result["plugins"] == ["metrics"]
+
+    def test_merge_append_list_strategy(self):
+        configs = [{"plugins": ["auth", "cache"]}, {"plugins": ["metrics"]}]
+        result = merge(configs, list_strategy="append")
+        assert result["plugins"] == ["auth", "cache", "metrics"]
+
+    def test_invalid_list_strategy_raises_value_error(self):
+        with pytest.raises(ValueError, match="Unknown list merge strategy"):
+            merge([{"a": 1}], list_strategy="invalid")
+
+    def test_list_strategy_ignored_for_shallow_merge(self):
+        configs = [{"db": {"host": "a"}}, {"db": {"port": 2}}]
+        result = merge(configs, strategy="shallow", list_strategy="replace")
+        assert result == {"db": {"port": 2}}
+
+
 class TestDeepMergeTypeConflict:
     """deep_merge() behaviour when base and override have incompatible types."""
 

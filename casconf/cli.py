@@ -24,12 +24,16 @@ from casconf.api import (
 from casconf.exceptions import CasConfError
 from casconf.writer import write
 
-_ENV_LOG_LEVEL = "CASCCONF_LOG_LEVEL"
+_ENV_LOG_LEVEL = "CASCONF_LOG_LEVEL"
+_ENV_OUTPUT = "CASCONF_OUTPUT"
+_ENV_FORMAT = "CASCONF_FORMAT"
+_ENV_VERBOSE = "CASCONF_VERBOSE"
 _DEFAULT_FORMAT = "json"
 
 
 def _build_parser() -> argparse.ArgumentParser:
     """Build and return the CLI argument parser."""
+    _default_verbose = os.environ.get(_ENV_VERBOSE, "").lower() in ("1", "true", "yes")
     parser = argparse.ArgumentParser(
         prog="casconf",
         description="Deep-merge configuration files across multiple directories following a cascading pattern.",
@@ -37,6 +41,12 @@ def _build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Output goes to stdout by default; pipe to other tools "
             "or use --output to write to a file.\n\n"
+            "All options can also be set via environment variables:\n"
+            f"  ${_ENV_DISCOVERY}  -- discovery config file path\n"
+            f"  ${_ENV_OUTPUT}     -- output file path\n"
+            f"  ${_ENV_FORMAT}     -- output format (json, yaml, toml)\n"
+            f"  ${_ENV_VERBOSE}    -- enable verbose logging (1/true/yes)\n"
+            f"  ${_ENV_LOG_LEVEL}  -- log level (DEBUG/INFO/WARNING/ERROR)\n\n"
             "Examples:\n"
             "  casconf\n"
             "  casconf --output ./merged.json\n"
@@ -53,23 +63,23 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output",
         metavar="FILE",
-        default=None,
-        help=("Write merged configuration to FILE instead of stdout."),
+        default=os.environ.get(_ENV_OUTPUT),
+        help=(f"Write merged configuration to FILE instead of stdout (or ${_ENV_OUTPUT})."),
     )
     parser.add_argument(
         "--format",
         dest="output_format",
         metavar="FORMAT",
-        default=_DEFAULT_FORMAT,
+        default=os.environ.get(_ENV_FORMAT, _DEFAULT_FORMAT),
         choices=["json", "yaml", "toml"],
-        help=("Output format: json (default), yaml, or toml."),
+        help=(f"Output format: json (default), yaml, or toml (or ${_ENV_FORMAT})."),
     )
     parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
-        default=False,
-        help="Enable verbose (DEBUG) logging.",
+        default=_default_verbose,
+        help=f"Enable verbose (DEBUG) logging (or set ${_ENV_VERBOSE}=1).",
     )
     parser.add_argument(
         "--version",
@@ -101,7 +111,7 @@ def _configure_logging(verbose: bool) -> None:
 
     Args:
         verbose: If ``True``, set log level to DEBUG; otherwise use
-            the value of ``$CASCCONF_LOG_LEVEL`` (default WARNING).
+            the value of ``$CASCONF_LOG_LEVEL`` (default WARNING).
     """
     if verbose:
         level = logging.DEBUG

@@ -47,12 +47,24 @@ class TestDiscoveryConfigConstruction:
         )
         assert dc.merge_strategy == "shallow"
 
-    def test_invalid_merge_strategy_raises(self):
-        with pytest.raises(CasConfConfigError, match="merge_strategy"):
+    def test_custom_list_merge_strategy(self):
+        dc = DiscoveryConfig(
+            directories=["/tmp"],
+            patterns=["*.yaml"],
+            list_merge_strategy="replace",
+        )
+        assert dc.list_merge_strategy == "replace"
+
+    def test_default_list_merge_strategy_is_append(self):
+        dc = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        assert dc.list_merge_strategy == "append"
+
+    def test_invalid_list_merge_strategy_raises(self):
+        with pytest.raises(CasConfConfigError, match="list_merge_strategy"):
             DiscoveryConfig(
                 directories=["/tmp"],
                 patterns=["*.json"],
-                merge_strategy="invalid",
+                list_merge_strategy="invalid",
             )
 
     def test_empty_directories_raises(self):
@@ -62,6 +74,65 @@ class TestDiscoveryConfigConstruction:
     def test_empty_patterns_raises(self):
         with pytest.raises(CasConfConfigError, match="patterns"):
             DiscoveryConfig(directories=["/tmp"], patterns=[])
+
+
+class TestEnvVarExpansionInPaths:
+    """DiscoveryConfig expands $VAR-style environment variables in directory paths."""
+
+    def test_env_var_expanded_in_directory(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_TEST_DIR"],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == tmp_path
+
+    def test_env_var_brace_syntax_expanded(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["${CASCONF_TEST_DIR}"],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == tmp_path
+
+    def test_env_var_in_path_segment_expanded(self, monkeypatch, tmp_path):
+        subdir = tmp_path / "prod"
+        subdir.mkdir()
+        monkeypatch.setenv("CASCONF_TEST_ENV", "prod")
+        dc = DiscoveryConfig(
+            directories=[str(tmp_path / "$CASCONF_TEST_ENV")],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == subdir
+
+    def test_unset_env_var_left_as_literal(self, monkeypatch):
+        monkeypatch.delenv("CASCONF_UNSET_VAR_XYZ", raising=False)
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_UNSET_VAR_XYZ"],
+            patterns=["*.json"],
+        )
+        # os.path.expandvars leaves unset variables unchanged on Unix
+        assert "$CASCONF_UNSET_VAR_XYZ" in str(dc.directories[0])
+
+    def test_env_var_expansion_used_by_discover(self, monkeypatch, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text("{}", encoding="utf-8")
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_TEST_DIR"],
+            patterns=["config.json"],
+        )
+        found = discover(dc)
+        assert len(found) == 1
+        assert found[0] == cfg_file
+
+    def test_env_var_expansion_via_from_dict(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig.from_dict({
+            "directories": ["$CASCONF_TEST_DIR"],
+            "patterns": ["*.json"],
+        })
+        assert dc.directories[0] == tmp_path
 
 
 class TestDiscoveryConfigFromDict:
@@ -88,6 +159,19 @@ class TestDiscoveryConfigFromDict:
     def test_merge_strategy_defaults_to_deep(self):
         dc = DiscoveryConfig.from_dict({"directories": ["/tmp"], "patterns": ["*.json"]})
         assert dc.merge_strategy == "deep"
+
+    def test_list_merge_strategy_defaults_to_append(self):
+        dc = DiscoveryConfig.from_dict({"directories": ["/tmp"], "patterns": ["*.json"]})
+        assert dc.list_merge_strategy == "append"
+
+    def test_list_merge_strategy_from_dict(self):
+        data = {
+            "directories": ["/tmp"],
+            "patterns": ["config.json"],
+            "list_merge_strategy": "replace",
+        }
+        dc = DiscoveryConfig.from_dict(data)
+        assert dc.list_merge_strategy == "replace"
 
 
 class TestDiscover:

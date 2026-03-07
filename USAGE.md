@@ -97,6 +97,7 @@ patterns:
   - "config.json"
 
 merge_strategy: deep
+list_merge_strategy: append   # 'append' (default) or 'replace'
 ```
 
 ### Step 3: Run CasConf
@@ -254,23 +255,10 @@ discovery = DiscoveryConfig(
     ],
     patterns=['config.json', 'config.yaml'],
     merge_strategy='deep',
+    list_merge_strategy='append',  # or 'replace'
 )
 
 config = merge_configs(discovery_config=discovery)
-```
-
-### Validation
-
-```python
-from casconf import merge_configs, validate_config
-from casconf.exceptions import CasConfValidationError
-
-try:
-    config = merge_configs(discovery_config='./casconf.yaml')
-    validate_config(config, schema='./schema.json')
-    print("Configuration is valid")
-except CasConfValidationError as e:
-    print(f"Invalid configuration: {e}")
 ```
 
 ### Application Integration
@@ -298,6 +286,139 @@ def load_app_config():
 ---
 
 ## Advanced Features
+
+### List Merge Strategy
+
+By default, when two configuration files both define the same list key, the lists are **appended** (concatenated). You can change this to **replace** so that the later list entirely overwrites the earlier one.
+
+**Append (default)** — accumulates items across files:
+
+```yaml
+# /etc/myapp/config.yaml
+plugins:
+  - auth
+  - cache
+
+# ~/.config/myapp/config.yaml
+plugins:
+  - metrics
+```
+
+With `list_merge_strategy: append` (default), the merged result is:
+
+```json
+{"plugins": ["auth", "cache", "metrics"]}
+```
+
+**Replace** — later list wins entirely:
+
+```yaml
+# casconf.yaml
+merge_strategy: deep
+list_merge_strategy: replace
+```
+
+With `list_merge_strategy: replace`, the merged result is:
+
+```json
+{"plugins": ["metrics"]}
+```
+
+Configure in the discovery file:
+
+```yaml
+# casconf.yaml
+directories:
+  - /etc/myapp
+  - ~/.config/myapp
+patterns:
+  - "config.yaml"
+merge_strategy: deep
+list_merge_strategy: replace
+```
+
+### Environment Variables for CLI Options
+
+All command-line options can be set via environment variables. This is useful in container environments, CI pipelines, or scripts where you want to configure CasConf without modifying command-line invocations.
+
+| Environment Variable | Corresponding Flag | Description |
+|---|---|---|
+| `CASCONF_DISCOVERY` | `--discovery-config` | Path to discovery configuration file |
+| `CASCONF_OUTPUT` | `--output` | Output file path |
+| `CASCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
+| `CASCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
+| `CASCONF_LOG_LEVEL` | _(no flag)_ | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+
+Command-line flags always take precedence over environment variables.
+
+**Examples:**
+
+```bash
+# Set output format and destination via environment
+export CASCONF_FORMAT=yaml
+export CASCONF_OUTPUT=/var/cache/myapp/config.yaml
+casconf
+
+# Enable verbose logging via environment
+export CASCONF_VERBOSE=1
+casconf
+
+# Use a specific discovery config via environment
+export CASCONF_DISCOVERY=/etc/myapp/casconf.yaml
+casconf
+
+# Override env with a flag (flag wins)
+CASCONF_FORMAT=yaml casconf --format toml   # output is toml
+```
+
+### FQDN-Based Host Configuration
+
+Directory paths in the discovery configuration support environment variable expansion. This enables host-specific configuration by embedding a machine's fully qualified domain name (FQDN) or hostname in the path.
+
+**Use case**: load a host-specific override file automatically based on the machine running the merge.
+
+```yaml
+# casconf.yaml
+directories:
+  - /etc/myapp/defaults          # site-wide defaults
+  - /etc/myapp/$HOSTNAME         # host-specific overrides, e.g. /etc/myapp/web-01.example.com
+  - ~/.config/myapp              # user overrides (highest priority)
+
+patterns:
+  - "config.yaml"
+  - "config.json"
+
+merge_strategy: deep
+```
+
+Set the environment variable before running CasConf:
+
+```bash
+# Use the machine's FQDN
+export HOSTNAME=$(hostname -f)
+casconf --output /tmp/config.json
+```
+
+If the host-specific directory does not exist (e.g., there is no override for this host), CasConf simply skips it with a warning and continues — no error is raised.
+
+You can use any environment variable in directory paths, not just `$HOSTNAME`:
+
+```yaml
+directories:
+  - /etc/myapp/defaults
+  - /etc/myapp/$ENVIRONMENT     # e.g. production, staging
+  - /etc/myapp/$DATACENTER      # e.g. us-east-1, eu-west-2
+  - /etc/myapp/$ROLE            # e.g. web, database, cache
+patterns:
+  - "config.yaml"
+```
+
+```bash
+export ENVIRONMENT=production
+export DATACENTER=us-east-1
+export ROLE=web
+casconf --output /tmp/config.json
+```
 
 ### Verbose Output
 

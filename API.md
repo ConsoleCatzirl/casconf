@@ -338,12 +338,12 @@ config = merge_configs(discovery_config=discovery)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CASCCONF_DISCOVERY` | Default path to the discovery configuration file | `casconf.yaml` |
-| `CASCCONF_LOG_LEVEL` | Default log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `WARNING` |
+| `CASCONF_DISCOVERY` | Default path to the discovery configuration file | `casconf.yaml` |
+| `CASCONF_LOG_LEVEL` | Default log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `WARNING` |
 
 ```python
 import os
-os.environ['CASCCONF_DISCOVERY'] = '/etc/myapp/casconf.yaml'
+os.environ['CASCONF_DISCOVERY'] = '/etc/myapp/casconf.yaml'
 
 from casconf import merge_configs
 config = merge_configs()  # Uses /etc/myapp/casconf.yaml

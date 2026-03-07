@@ -65,6 +65,52 @@ class TestArgumentParser:
         assert args.discovery_config == p
 
 
+class TestArgumentParserEnvVars:
+    """_build_parser() reads defaults from environment variables."""
+
+    def test_env_output_sets_default(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_OUTPUT", "/tmp/env-out.json")
+        parser = _build_parser()
+        args = parser.parse_args([])
+        assert args.output == "/tmp/env-out.json"
+
+    def test_env_format_sets_default(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_FORMAT", "yaml")
+        parser = _build_parser()
+        args = parser.parse_args([])
+        assert args.output_format == "yaml"
+
+    def test_env_verbose_sets_default(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_VERBOSE", "1")
+        parser = _build_parser()
+        args = parser.parse_args([])
+        assert args.verbose is True
+
+    def test_env_verbose_true_string(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_VERBOSE", "true")
+        parser = _build_parser()
+        args = parser.parse_args([])
+        assert args.verbose is True
+
+    def test_env_verbose_false_when_not_set(self, monkeypatch):
+        monkeypatch.delenv("CASCONF_VERBOSE", raising=False)
+        parser = _build_parser()
+        args = parser.parse_args([])
+        assert args.verbose is False
+
+    def test_cli_flag_overrides_env_output(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_OUTPUT", "/tmp/env-out.json")
+        parser = _build_parser()
+        args = parser.parse_args(["--output", "/tmp/cli-out.json"])
+        assert args.output == "/tmp/cli-out.json"
+
+    def test_cli_flag_overrides_env_format(self, monkeypatch):
+        monkeypatch.setenv("CASCONF_FORMAT", "yaml")
+        parser = _build_parser()
+        args = parser.parse_args(["--format", "toml"])
+        assert args.output_format == "toml"
+
+
 class TestMainCli:
     """main() end-to-end tests."""
 

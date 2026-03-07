@@ -22,6 +22,7 @@ from casconf.exceptions import CasConfConfigError
 logger = logging.getLogger(__name__)
 
 _VALID_STRATEGIES = frozenset({"deep", "shallow"})
+_VALID_LIST_STRATEGIES = frozenset({"append", "replace"})
 
 
 class DiscoveryConfig:
@@ -36,6 +37,9 @@ class DiscoveryConfig:
             Supports glob wildcards (``*``, ``?``, ``[…]``).
         merge_strategy: Merge strategy to use (``'deep'`` or
             ``'shallow'``).
+        list_merge_strategy: How lists are merged during deep merge.
+            One of ``'append'`` (default, concatenates lists) or
+            ``'replace'`` (override list replaces base list).
     """
 
     def __init__(
@@ -43,6 +47,7 @@ class DiscoveryConfig:
         directories: list[str | Path],
         patterns: list[str],
         merge_strategy: str = "deep",
+        list_merge_strategy: str = "append",
     ) -> None:
         """Initialise a DiscoveryConfig.
 
@@ -53,9 +58,13 @@ class DiscoveryConfig:
             patterns: File name patterns to match.
             merge_strategy: One of ``'deep'`` (default) or
                 ``'shallow'``.
+            list_merge_strategy: How lists are merged during deep
+                merge.  One of ``'append'`` (default) or
+                ``'replace'``.
 
         Raises:
-            CasConfConfigError: If *merge_strategy* is invalid or
+            CasConfConfigError: If *merge_strategy* or
+                *list_merge_strategy* is invalid, or
                 *directories*/*patterns* are empty.
         """
         if not directories:
@@ -64,10 +73,15 @@ class DiscoveryConfig:
             raise CasConfConfigError("'patterns' must contain at least one entry.")
         if merge_strategy not in _VALID_STRATEGIES:
             raise CasConfConfigError(f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}")
+        if list_merge_strategy not in _VALID_LIST_STRATEGIES:
+            raise CasConfConfigError(
+                f"Invalid list_merge_strategy {list_merge_strategy!r}. Must be one of: {sorted(_VALID_LIST_STRATEGIES)}"
+            )
 
         self.directories: list[Path] = [Path(os.path.expandvars(os.path.expanduser(str(d)))) for d in directories]
         self.patterns: list[str] = list(patterns)
         self.merge_strategy: str = merge_strategy
+        self.list_merge_strategy: str = list_merge_strategy
 
     # ------------------------------------------------------------------
     # Class-method constructors
@@ -107,7 +121,8 @@ class DiscoveryConfig:
 
         Args:
             data: Dictionary with keys ``'directories'``,
-                ``'patterns'``, and optionally ``'merge_strategy'``.
+                ``'patterns'``, and optionally ``'merge_strategy'``
+                and ``'list_merge_strategy'``.
 
         Returns:
             A new :class:`DiscoveryConfig` instance.
@@ -122,6 +137,7 @@ class DiscoveryConfig:
             directories=data["directories"],
             patterns=data["patterns"],
             merge_strategy=data.get("merge_strategy", "deep"),
+            list_merge_strategy=data.get("list_merge_strategy", "append"),
         )
 
     # ------------------------------------------------------------------
@@ -133,7 +149,8 @@ class DiscoveryConfig:
             f"DiscoveryConfig("
             f"directories={self.directories!r}, "
             f"patterns={self.patterns!r}, "
-            f"merge_strategy={self.merge_strategy!r})"
+            f"merge_strategy={self.merge_strategy!r}, "
+            f"list_merge_strategy={self.list_merge_strategy!r})"
         )
 
     def __eq__(self, other: object) -> bool:
@@ -143,6 +160,7 @@ class DiscoveryConfig:
             self.directories == other.directories
             and self.patterns == other.patterns
             and self.merge_strategy == other.merge_strategy
+            and self.list_merge_strategy == other.list_merge_strategy
         )
 
 

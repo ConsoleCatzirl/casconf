@@ -1,16 +1,16 @@
-CascConf Dual License
+CasConf Dual License
 =====================
 
-CascConf is dual-licensed depending on how it is used:
+CasConf is dual-licensed depending on how it is used:
 
-  1. MIT License — applies when CascConf is run as a standalone executable
-     (CLI tool). This covers usage via the `cascconf` command, scripts that
-     invoke the `cascconf` binary, and any usage that does not import
-     CascConf as a Python library into another program.
+  1. MIT License — applies when CasConf is run as a standalone executable
+     (CLI tool). This covers usage via the `casconf` command, scripts that
+     invoke the `casconf` binary, and any usage that does not import
+     CasConf as a Python library into another program.
 
-  2. GNU General Public License v3.0 (GPL-3.0) — applies when CascConf is
+  2. GNU General Public License v3.0 (GPL-3.0) — applies when CasConf is
      imported or linked as a Python library into another program. This covers
-     `import cascconf`, `from cascconf import ...`, and any other form of
+     `import casconf`, `from casconf import ...`, and any other form of
      programmatic integration.
 
 If you are uncertain which license applies to your use case, the GPL-3.0
@@ -21,7 +21,7 @@ applies by default.
 MIT License
 (applies to standalone executable / CLI usage)
 
-Copyright (c) 2026 CascConf Contributors
+Copyright (c) 2026 CasConf Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ SOFTWARE.
 GNU General Public License v3.0
 (applies to library / import usage)
 
-Copyright (C) 2026 CascConf Contributors
+Copyright (C) 2026 CasConf Contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
