@@ -1,4 +1,4 @@
-"""Tests for cascconf.merger."""
+"""Tests for casconf.merger."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from cascconf.merger import deep_merge, merge, shallow_merge
+from casconf.merger import deep_merge, merge, shallow_merge
 
 
 class TestDeepMerge:
@@ -136,3 +136,20 @@ class TestMerge:
         configs = [{"a": 1}, {"b": 2}, {"c": 3}]
         result = merge(configs)
         assert result == {"a": 1, "b": 2, "c": 3}
+
+
+class TestDeepMergeTypeConflict:
+    """deep_merge() behaviour when base and override have incompatible types."""
+
+    def test_type_conflict_override_wins(self):
+        base = {"key": "a string"}
+        override = {"key": {"nested": "dict"}}
+        result = deep_merge(base, override)
+        assert result["key"] == {"nested": "dict"}
+
+    def test_type_conflict_logs_warning(self, caplog):
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="casconf.merger"):
+            deep_merge({"key": "string"}, {"key": 42})
+        assert any("conflict" in r.message.lower() for r in caplog.records)

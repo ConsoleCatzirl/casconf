@@ -1,25 +1,25 @@
-# CascConf API Reference
+# CasConf API Reference
 
-This document describes the public Python library API for CascConf.
+This document describes the public Python library API for CasConf.
 
 ## Installation
 
 ```bash
-pip install cascconf
+pip install casconf
 ```
 
 ## Quick Start
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
 # Merge configurations and return as a dict
-config = merge_configs(discovery_config='./cascconf.yaml')
+config = merge_configs(discovery_config='./casconf.yaml')
 print(config['database']['host'])
 
 # Merge configurations and write to a file
 merge_configs(
-    discovery_config='./cascconf.yaml',
+    discovery_config='./casconf.yaml',
     output='./merged.json',
     output_format='json',
 )
@@ -35,7 +35,7 @@ Discover, parse, and deep-merge configuration files.
 
 ```python
 def merge_configs(
-    discovery_config: str | Path | DiscoveryConfig = 'cascconf.yaml',
+    discovery_config: str | Path | DiscoveryConfig = 'casconf.yaml',
     output: str | Path | None = None,
     output_format: str = 'json',
     log_level: int = logging.WARNING,
@@ -47,7 +47,7 @@ def merge_configs(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `discovery_config` | `str`, `Path`, or `DiscoveryConfig` | `'cascconf.yaml'` | Path to the discovery configuration file, or a `DiscoveryConfig` object. |
+| `discovery_config` | `str`, `Path`, or `DiscoveryConfig` | `'casconf.yaml'` | Path to the discovery configuration file, or a `DiscoveryConfig` object. |
 | `output` | `str`, `Path`, or `None` | `None` | Path to the output file. If `None`, returns the merged dict. |
 | `output_format` | `str` | `'json'` | Output format when writing to a file. One of `'json'`, `'yaml'`, `'toml'`. |
 | `log_level` | `int` | `logging.WARNING` | Logging level for merge operations. Use `logging.DEBUG` for verbose output. |
@@ -59,24 +59,24 @@ def merge_configs(
 
 #### Raises
 
-- `CascConfConfigError`: If the discovery configuration is invalid.
-- `CascConfParseError`: If a configuration file cannot be parsed.
-- `CascConfMergeError`: If configurations cannot be merged.
-- `CascConfWriteError`: If the output file cannot be written.
+- `CasConfConfigError`: If the discovery configuration is invalid.
+- `CasConfParseError`: If a configuration file cannot be parsed.
+- `CasConfMergeError`: If configurations cannot be merged.
+- `CasConfWriteError`: If the output file cannot be written.
 
 #### Examples
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
 # Return merged config as a dict
 config = merge_configs()
 
 # Use a custom discovery config path
-config = merge_configs(discovery_config='/etc/myapp/cascconf.yaml')
+config = merge_configs(discovery_config='/etc/myapp/casconf.yaml')
 
 # Use a DiscoveryConfig object
-from cascconf import DiscoveryConfig
+from casconf import DiscoveryConfig
 discovery = DiscoveryConfig(
     directories=['/etc/myapp', '~/.config/myapp', './config'],
     patterns=['config.json'],
@@ -85,13 +85,13 @@ config = merge_configs(discovery_config=discovery)
 
 # Write to a JSON file
 merge_configs(
-    discovery_config='./cascconf.yaml',
+    discovery_config='./casconf.yaml',
     output='./merged.json',
 )
 
 # Write to a YAML file
 merge_configs(
-    discovery_config='./cascconf.yaml',
+    discovery_config='./casconf.yaml',
     output='./merged.yaml',
     output_format='yaml',
 )
@@ -105,7 +105,7 @@ config = merge_configs(log_level=logging.DEBUG)
 
 ### `DiscoveryConfig`
 
-Configuration object for the CascConf discovery engine.
+Configuration object for the CasConf discovery engine.
 
 ```python
 class DiscoveryConfig:
@@ -141,7 +141,7 @@ class DiscoveryConfig:
 Load a `DiscoveryConfig` from a YAML, JSON, or TOML file.
 
 ```python
-discovery = DiscoveryConfig.from_file('./cascconf.yaml')
+discovery = DiscoveryConfig.from_file('./casconf.yaml')
 ```
 
 **`DiscoveryConfig.from_dict(data)`**
@@ -168,7 +168,7 @@ discovery = DiscoveryConfig.from_dict({
 
 ```python
 from pathlib import Path
-from cascconf import DiscoveryConfig, merge_configs
+from casconf import DiscoveryConfig, merge_configs
 
 discovery = DiscoveryConfig(
     directories=[
@@ -187,52 +187,52 @@ config = merge_configs(discovery_config=discovery)
 
 ## Exceptions
 
-All CascConf exceptions are importable from `cascconf.exceptions`.
+All CasConf exceptions are importable from `casconf.exceptions`.
 
 ```python
-from cascconf.exceptions import (
-    CascConfError,
-    CascConfConfigError,
-    CascConfParseError,
-    CascConfMergeError,
-    CascConfWriteError,
+from casconf.exceptions import (
+    CasConfError,
+    CasConfConfigError,
+    CasConfParseError,
+    CasConfMergeError,
+    CasConfWriteError,
 )
 ```
 
 ### Exception Hierarchy
 
 ```
-CascConfError (base)
-├── CascConfConfigError     — Invalid discovery configuration
-├── CascConfParseError      — Failed to parse a configuration file
-├── CascConfMergeError      — Irreconcilable merge conflict
-└── CascConfWriteError      — Failed to write output
+CasConfError (base)
+├── CasConfConfigError     — Invalid discovery configuration
+├── CasConfParseError      — Failed to parse a configuration file
+├── CasConfMergeError      — Irreconcilable merge conflict
+└── CasConfWriteError      — Failed to write output
 ```
 
-### `CascConfError`
+### `CasConfError`
 
-Base class for all CascConf exceptions.
+Base class for all CasConf exceptions.
 
 ```python
-class CascConfError(Exception):
-    """Base exception for all CascConf errors."""
+class CasConfError(Exception):
+    """Base exception for all CasConf errors."""
 ```
 
-### `CascConfConfigError`
+### `CasConfConfigError`
 
 Raised when the discovery configuration is invalid (missing required keys, invalid values, unreadable file).
 
 ```python
-class CascConfConfigError(CascConfError):
+class CasConfConfigError(CasConfError):
     """Raised when the discovery configuration is invalid."""
 ```
 
-### `CascConfParseError`
+### `CasConfParseError`
 
 Raised when a configuration file cannot be read or parsed.
 
 ```python
-class CascConfParseError(CascConfError):
+class CasConfParseError(CasConfError):
     """Raised when a configuration file cannot be parsed.
 
     Attributes:
@@ -241,21 +241,21 @@ class CascConfParseError(CascConfError):
     path: Path
 ```
 
-### `CascConfMergeError`
+### `CasConfMergeError`
 
 Raised when configurations cannot be merged due to an irreconcilable conflict.
 
 ```python
-class CascConfMergeError(CascConfError):
+class CasConfMergeError(CasConfError):
     """Raised when configurations cannot be merged."""
 ```
 
-### `CascConfWriteError`
+### `CasConfWriteError`
 
 Raised when the output file cannot be written (permission denied, invalid path, unsupported format).
 
 ```python
-class CascConfWriteError(CascConfError):
+class CasConfWriteError(CasConfError):
     """Raised when the output cannot be written."""
 ```
 
@@ -266,16 +266,16 @@ class CascConfWriteError(CascConfError):
 ### Handling Errors Gracefully
 
 ```python
-from cascconf import merge_configs
-from cascconf.exceptions import CascConfError, CascConfParseError
+from casconf import merge_configs
+from casconf.exceptions import CasConfError, CasConfParseError
 
 try:
-    config = merge_configs(discovery_config='./cascconf.yaml')
-except CascConfParseError as e:
+    config = merge_configs(discovery_config='./casconf.yaml')
+except CasConfParseError as e:
     print(f"Could not parse {e.path}: {e}")
     raise SystemExit(1)
-except CascConfError as e:
-    print(f"CascConf error: {e}")
+except CasConfError as e:
+    print(f"CasConf error: {e}")
     raise SystemExit(1)
 ```
 
@@ -284,8 +284,8 @@ except CascConfError as e:
 ```python
 import logging
 from functools import lru_cache
-from cascconf import merge_configs, DiscoveryConfig
-from cascconf.exceptions import CascConfError
+from casconf import merge_configs, DiscoveryConfig
+from casconf.exceptions import CasConfError
 
 logger = logging.getLogger(__name__)
 
@@ -307,7 +307,7 @@ def get_config() -> dict:
             discovery_config=_DISCOVERY,
             log_level=logging.DEBUG,
         )
-    except CascConfError as e:
+    except CasConfError as e:
         logger.critical("Failed to load configuration: %s", e)
         raise
 ```
@@ -316,7 +316,7 @@ def get_config() -> dict:
 
 ```python
 import os
-from cascconf import DiscoveryConfig, merge_configs
+from casconf import DiscoveryConfig, merge_configs
 
 ENV = os.getenv('APP_ENV', 'development')
 
@@ -338,26 +338,26 @@ config = merge_configs(discovery_config=discovery)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CASCCONF_DISCOVERY` | Default path to the discovery configuration file | `cascconf.yaml` |
+| `CASCCONF_DISCOVERY` | Default path to the discovery configuration file | `casconf.yaml` |
 | `CASCCONF_LOG_LEVEL` | Default log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `WARNING` |
 
 ```python
 import os
-os.environ['CASCCONF_DISCOVERY'] = '/etc/myapp/cascconf.yaml'
+os.environ['CASCCONF_DISCOVERY'] = '/etc/myapp/casconf.yaml'
 
-from cascconf import merge_configs
-config = merge_configs()  # Uses /etc/myapp/cascconf.yaml
+from casconf import merge_configs
+config = merge_configs()  # Uses /etc/myapp/casconf.yaml
 ```
 
 ---
 
 ## Type Hints
 
-CascConf ships with a `py.typed` marker (PEP 561). Full type hints are available for all public API functions and classes. Type checkers such as `mypy` and `pyright` are fully supported.
+CasConf ships with a `py.typed` marker (PEP 561). Full type hints are available for all public API functions and classes. Type checkers such as `mypy` and `pyright` are fully supported.
 
 ```python
 from typing import Any
-from cascconf import merge_configs, DiscoveryConfig
+from casconf import merge_configs, DiscoveryConfig
 
 def load(discovery: DiscoveryConfig) -> dict[str, Any]:
     result = merge_configs(discovery_config=discovery)
@@ -369,20 +369,20 @@ def load(discovery: DiscoveryConfig) -> dict[str, Any]:
 
 ## Logging
 
-CascConf uses the standard `logging` module under the logger name `cascconf`. To see detailed merge information, configure logging before calling `merge_configs()`:
+CasConf uses the standard `logging` module under the logger name `casconf`. To see detailed merge information, configure logging before calling `merge_configs()`:
 
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from cascconf import merge_configs
+from casconf import merge_configs
 config = merge_configs()
 ```
 
 Or pass `log_level` directly:
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 config = merge_configs(log_level=logging.DEBUG)
 ```
 

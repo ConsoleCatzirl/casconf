@@ -1,4 +1,4 @@
-"""CascConf discovery engine.
+"""CasConf discovery engine.
 
 Responsible for locating configuration files based on a
 :class:`DiscoveryConfig` and returning an ordered list of
@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from cascconf.exceptions import CascConfConfigError
+from casconf.exceptions import CasConfConfigError
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ _VALID_STRATEGIES = frozenset({"deep", "shallow"})
 
 
 class DiscoveryConfig:
-    """Configuration for the CascConf discovery engine.
+    """Configuration for the CasConf discovery engine.
 
     Directories are scanned in the order they are listed; later
     entries take precedence over earlier ones during merging.
@@ -55,17 +55,15 @@ class DiscoveryConfig:
                 ``'shallow'``.
 
         Raises:
-            CascConfConfigError: If *merge_strategy* is invalid or
+            CasConfConfigError: If *merge_strategy* is invalid or
                 *directories*/*patterns* are empty.
         """
         if not directories:
-            raise CascConfConfigError("'directories' must contain at least one entry.")
+            raise CasConfConfigError("'directories' must contain at least one entry.")
         if not patterns:
-            raise CascConfConfigError("'patterns' must contain at least one entry.")
+            raise CasConfConfigError("'patterns' must contain at least one entry.")
         if merge_strategy not in _VALID_STRATEGIES:
-            raise CascConfConfigError(
-                f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}"
-            )
+            raise CasConfConfigError(f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}")
 
         self.directories: list[Path] = [Path(os.path.expandvars(os.path.expanduser(str(d)))) for d in directories]
         self.patterns: list[str] = list(patterns)
@@ -86,21 +84,21 @@ class DiscoveryConfig:
             A new :class:`DiscoveryConfig` instance.
 
         Raises:
-            CascConfConfigError: If the file cannot be read or is
+            CasConfConfigError: If the file cannot be read or is
                 missing required keys.
         """
-        from cascconf.registry import registry
+        from casconf.registry import registry
 
         resolved = Path(path).expanduser().resolve()
         if not resolved.exists():
-            raise CascConfConfigError(f"Discovery configuration file not found: {resolved}")
+            raise CasConfConfigError(f"Discovery configuration file not found: {resolved}")
         parser = registry.get_parser(resolved.suffix)
         if parser is None:
-            raise CascConfConfigError(f"Unsupported discovery configuration format: {resolved.suffix!r}")
+            raise CasConfConfigError(f"Unsupported discovery configuration format: {resolved.suffix!r}")
         try:
             data: dict[str, Any] = parser(resolved)
         except Exception as exc:
-            raise CascConfConfigError(f"Failed to read discovery configuration: {exc}") from exc
+            raise CasConfConfigError(f"Failed to read discovery configuration: {exc}") from exc
         return cls.from_dict(data)
 
     @classmethod
@@ -115,11 +113,11 @@ class DiscoveryConfig:
             A new :class:`DiscoveryConfig` instance.
 
         Raises:
-            CascConfConfigError: If required keys are missing.
+            CasConfConfigError: If required keys are missing.
         """
         for key in ("directories", "patterns"):
             if key not in data:
-                raise CascConfConfigError(f"Missing required key in discovery configuration: {key!r}")
+                raise CasConfConfigError(f"Missing required key in discovery configuration: {key!r}")
         return cls(
             directories=data["directories"],
             patterns=data["patterns"],

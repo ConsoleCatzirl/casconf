@@ -3,7 +3,7 @@ requires = ["pbr>=5.0", "setuptools>=61.0"]
 build-backend = "pbr.build"
 
 [project]
-name = "cascconf"
+name = "casconf"
 dynamic = ["version"]
 description = "Cascading Configuration Manager - deep-merge configuration files across multiple directories"
 readme = "README.md"
@@ -67,14 +67,14 @@ dev = [
 ]
 
 [project.scripts]
-cascconf = "cascconf.cli:main"
+casconf = "casconf.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ConsoleCatzirl/cascconf"
-Documentation = "https://github.com/ConsoleCatzirl/cascconf#readme"
-Repository = "https://github.com/ConsoleCatzirl/cascconf.git"
-Issues = "https://github.com/ConsoleCatzirl/cascconf/issues"
-Changelog = "https://github.com/ConsoleCatzirl/cascconf/blob/main/ChangeLog"
+Homepage = "https://github.com/ConsoleCatzirl/casconf"
+Documentation = "https://github.com/ConsoleCatzirl/casconf#readme"
+Repository = "https://github.com/ConsoleCatzirl/casconf.git"
+Issues = "https://github.com/ConsoleCatzirl/casconf/issues"
+Changelog = "https://github.com/ConsoleCatzirl/casconf/blob/main/ChangeLog"
 
 [tool.pbr]
 warnerrors = true
@@ -101,7 +101,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 127
-known_first_party = ["cascconf"]
+known_first_party = ["casconf"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 skip_gitignore = true
 
@@ -136,7 +136,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["cascconf"]
+source = ["casconf"]
 branch = true
 omit = [
     "*/tests/*",

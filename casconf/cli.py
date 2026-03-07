@@ -1,12 +1,12 @@
-"""CascConf CLI — argument parsing and orchestration.
+"""CasConf CLI — argument parsing and orchestration.
 
 The :func:`main` function is the entry point registered in
 ``pyproject.toml``::
 
     [project.scripts]
-    cascconf = "cascconf.cli:main"
+    casconf = casconf.cli:main"
 
-It is also invoked when running ``python -m cascconf``.
+It is also invoked when running ``python -m casconf``.
 """
 
 from __future__ import annotations
@@ -16,13 +16,13 @@ import logging
 import os
 import sys
 
-from cascconf.api import (
+from casconf.api import (
     _DEFAULT_DISCOVERY,
     _ENV_DISCOVERY,
     merge_configs,
 )
-from cascconf.exceptions import CascConfError
-from cascconf.writer import write
+from casconf.exceptions import CasConfError
+from casconf.writer import write
 
 _ENV_LOG_LEVEL = "CASCCONF_LOG_LEVEL"
 _DEFAULT_FORMAT = "json"
@@ -31,17 +31,17 @@ _DEFAULT_FORMAT = "json"
 def _build_parser() -> argparse.ArgumentParser:
     """Build and return the CLI argument parser."""
     parser = argparse.ArgumentParser(
-        prog="cascconf",
+        prog="casconf",
         description="Deep-merge configuration files across multiple directories following a cascading pattern.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Output goes to stdout by default; pipe to other tools "
             "or use --output to write to a file.\n\n"
             "Examples:\n"
-            "  cascconf\n"
-            "  cascconf --output ./merged.json\n"
-            "  cascconf --format yaml | grep host\n"
-            "  cascconf | jq '.database'\n"
+            "  casconf\n"
+            "  casconf --output ./merged.json\n"
+            "  casconf --format yaml | grep host\n"
+            "  casconf | jq '.database'\n"
         ),
     )
     parser.add_argument(
@@ -91,9 +91,9 @@ def _get_version() -> str:
     try:
         from importlib.metadata import PackageNotFoundError, version
 
-        return f"cascconf {version('cascconf')}"
+        return f"casconf {version('casconf')}"
     except PackageNotFoundError:
-        return "cascconf (version unknown)"
+        return "casconf (version unknown)"
 
 
 def _configure_logging(verbose: bool) -> None:
@@ -138,8 +138,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         assert merged is not None
         write(merged, output=args.output, fmt=args.output_format)
-    except CascConfError as exc:
-        logging.getLogger("cascconf").error("%s", exc)
+    except CasConfError as exc:
+        logging.getLogger("casconf").error("%s", exc)
         print(f"Error: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:  # noqa: BLE001

@@ -1,4 +1,4 @@
-"""Tests for cascconf.writer."""
+"""Tests for casconf.writer."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from cascconf.exceptions import CascConfWriteError
-from cascconf.writer import write
+from casconf.exceptions import CasConfWriteError
+from casconf.writer import write
 
 
 class TestWriteToFile:
@@ -35,7 +35,7 @@ class TestWriteToFile:
 
     def test_unsupported_format_raises_write_error(self, tmp_path):
         dest = tmp_path / "out.xml"
-        with pytest.raises(CascConfWriteError, match="Unsupported"):
+        with pytest.raises(CasConfWriteError, match="Unsupported"):
             write({"a": 1}, output=dest, fmt="xml")
 
     def test_json_output_is_sorted_and_indented(self, tmp_path):
@@ -66,7 +66,7 @@ class TestWriteToStdout:
         assert data["host"] == "localhost"
 
     def test_unsupported_format_raises_write_error(self):
-        with pytest.raises(CascConfWriteError, match="Unsupported"):
+        with pytest.raises(CasConfWriteError, match="Unsupported"):
             write({"a": 1}, output=None, fmt="csv")
 
 
@@ -78,3 +78,14 @@ class TestWriteEmptyDict:
         write({}, output=dest, fmt="json")
         data = json.loads(dest.read_text(encoding="utf-8"))
         assert data == {}
+
+
+class TestWriteToml:
+    """write() with TOML output format."""
+
+    def test_toml_output_is_written(self, tmp_path):
+        dest = tmp_path / "out.toml"
+        write({"name": "casconf", "version": "1.0"}, output=dest, fmt="toml")
+        assert dest.exists()
+        content = dest.read_text(encoding="utf-8")
+        assert "casconf" in content

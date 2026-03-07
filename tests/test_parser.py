@@ -1,4 +1,4 @@
-"""Tests for cascconf.parser."""
+"""Tests for casconf.parser."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from cascconf.exceptions import CascConfParseError
-from cascconf.parser import parse
+from casconf.exceptions import CasConfParseError
+from casconf.parser import parse
 
 # Path to the test fixtures directory
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -34,7 +34,7 @@ class TestParseJson:
     def test_invalid_json_raises_parse_error(self, tmp_path):
         f = tmp_path / "bad.json"
         f.write_text("{invalid json}", encoding="utf-8")
-        with pytest.raises(CascConfParseError) as exc_info:
+        with pytest.raises(CasConfParseError) as exc_info:
             parse(f)
         assert exc_info.value.path == f
 
@@ -45,7 +45,7 @@ class TestParseJson:
         # (parser returns it; this tests that the path is set)
         # Actually parse returns the list as-is; test bad syntax
         f.write_text("{bad:", encoding="utf-8")
-        with pytest.raises(CascConfParseError) as exc_info:
+        with pytest.raises(CasConfParseError) as exc_info:
             parse(f)
         assert exc_info.value.path == f
 
@@ -86,7 +86,7 @@ class TestParseErrors:
 
     def test_missing_file_raises_parse_error(self, tmp_path):
         f = tmp_path / "nonexistent.json"
-        with pytest.raises(CascConfParseError) as exc_info:
+        with pytest.raises(CasConfParseError) as exc_info:
             parse(f)
         assert exc_info.value.path == f
 
@@ -96,3 +96,26 @@ class TestParseErrors:
         f.write_text('{"key": "value"}', encoding="utf-8")
         result = parse(f)
         assert result == {"key": "value"}
+
+
+class TestParseToml:
+    """parse() with TOML files."""
+
+    def test_parses_toml_file(self, tmp_path):
+        f = tmp_path / "config.toml"
+        f.write_text(
+            '[database]\nhost = "localhost"\nport = 5432\n',
+            encoding="utf-8",
+        )
+        result = parse(f)
+        assert result["database"]["host"] == "localhost"
+
+
+class TestParserFallbackAllFail:
+    """parse() raises CasConfParseError when every parser attempt fails."""
+
+    def test_truly_unparseable_file_raises(self, tmp_path):
+        f = tmp_path / "garbage.unknown"
+        f.write_bytes(b"\xff\xfe\xfd")  # invalid for all text parsers
+        with pytest.raises(CasConfParseError):
+            parse(f)

@@ -1,4 +1,4 @@
-"""Tests for cascconf.discovery."""
+"""Tests for casconf.discovery."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from cascconf.discovery import DiscoveryConfig, discover
-from cascconf.exceptions import CascConfConfigError
+from casconf.discovery import DiscoveryConfig, discover
+from casconf.exceptions import CasConfConfigError
 
 # Path to the test fixtures directory
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -48,7 +48,7 @@ class TestDiscoveryConfigConstruction:
         assert dc.merge_strategy == "shallow"
 
     def test_invalid_merge_strategy_raises(self):
-        with pytest.raises(CascConfConfigError, match="merge_strategy"):
+        with pytest.raises(CasConfConfigError, match="merge_strategy"):
             DiscoveryConfig(
                 directories=["/tmp"],
                 patterns=["*.json"],
@@ -56,11 +56,11 @@ class TestDiscoveryConfigConstruction:
             )
 
     def test_empty_directories_raises(self):
-        with pytest.raises(CascConfConfigError, match="directories"):
+        with pytest.raises(CasConfConfigError, match="directories"):
             DiscoveryConfig(directories=[], patterns=["*.json"])
 
     def test_empty_patterns_raises(self):
-        with pytest.raises(CascConfConfigError, match="patterns"):
+        with pytest.raises(CasConfConfigError, match="patterns"):
             DiscoveryConfig(directories=["/tmp"], patterns=[])
 
 
@@ -78,11 +78,11 @@ class TestDiscoveryConfigFromDict:
         assert dc.merge_strategy == "shallow"
 
     def test_missing_directories_raises(self):
-        with pytest.raises(CascConfConfigError, match="directories"):
+        with pytest.raises(CasConfConfigError, match="directories"):
             DiscoveryConfig.from_dict({"patterns": ["*.json"]})
 
     def test_missing_patterns_raises(self):
-        with pytest.raises(CascConfConfigError, match="patterns"):
+        with pytest.raises(CasConfConfigError, match="patterns"):
             DiscoveryConfig.from_dict({"directories": ["/tmp"]})
 
     def test_merge_strategy_defaults_to_deep(self):
@@ -152,3 +152,55 @@ class TestDiscover:
         )
         found = discover(dc)
         assert any(f.suffix == ".json" for f in found)
+
+
+class TestDiscoveryConfigFromFile:
+    """DiscoveryConfig.from_file() edge cases."""
+
+    def test_unsupported_extension_raises(self, tmp_path):
+        p = tmp_path / "dc.xml"
+        p.write_text("<config/>", encoding="utf-8")
+        with pytest.raises(CasConfConfigError, match="Unsupported"):
+            DiscoveryConfig.from_file(p)
+
+    def test_bad_yaml_content_raises(self, tmp_path):
+        p = tmp_path / "dc.yaml"
+        # Valid YAML but missing required keys triggers CasConfConfigError
+        # via from_dict, not the parser; use truly unparseable YAML
+        p.write_text(
+            "directories: ['/tmp']\npatterns: [\n",
+            encoding="utf-8",
+        )
+        with pytest.raises(CasConfConfigError):
+            DiscoveryConfig.from_file(p)
+
+
+class TestDiscoveryConfigEquality:
+    """DiscoveryConfig.__eq__() comparison behaviour."""
+
+    def test_eq_with_non_discovery_config_returns_not_implemented(self):
+        dc = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        result = dc.__eq__("not a DiscoveryConfig")
+        assert result is NotImplemented
+
+    def test_eq_same_values_returns_true(self):
+        dc1 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        dc2 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        assert dc1 == dc2
+
+    def test_eq_different_strategy_returns_false(self):
+        dc1 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"], merge_strategy="deep")
+        dc2 = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"], merge_strategy="shallow")
+        assert dc1 != dc2
+
+
+class TestDiscoverPathNotDir:
+    """discover() skips entries that are files rather than directories."""
+
+    def test_file_path_used_as_directory_is_skipped(self, tmp_path):
+        # Use a regular file as a directory — should be warned and skipped
+        f = tmp_path / "not_a_dir.json"
+        f.write_text("{}", encoding="utf-8")
+        dc = DiscoveryConfig(directories=[str(f)], patterns=["*.json"])
+        found = discover(dc)
+        assert found == []

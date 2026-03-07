@@ -1,4 +1,4 @@
-"""CascConf merger engine.
+"""CasConf merger engine.
 
 Implements deep and shallow merge strategies for combining
 multiple configuration dictionaries into one.

@@ -1,4 +1,4 @@
-"""CascConf parser engine.
+"""CasConf parser engine.
 
 Reads a configuration file from disk and returns its contents as a
 plain Python ``dict``.  Format detection is extension-based with a
@@ -11,8 +11,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cascconf.exceptions import CascConfParseError
-from cascconf.registry import registry
+from casconf.exceptions import CasConfParseError
+from casconf.registry import registry
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +32,11 @@ def parse(path: Path) -> dict[str, Any]:
         file returns an empty dict.
 
     Raises:
-        CascConfParseError: If the file cannot be read or no parser
+        CasConfParseError: If the file cannot be read or no parser
             succeeds.
     """
     if not path.exists():
-        raise CascConfParseError(
+        raise CasConfParseError(
             f"Configuration file not found: {path}",
             path,
         )
@@ -53,7 +53,7 @@ def parse(path: Path) -> dict[str, Any]:
         try:
             return parser_fn(path)
         except Exception as exc:
-            raise CascConfParseError(
+            raise CasConfParseError(
                 f"Failed to parse {path}: {exc}",
                 path,
             ) from exc
@@ -77,7 +77,7 @@ def parse(path: Path) -> dict[str, Any]:
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
 
-    raise CascConfParseError(
+    raise CasConfParseError(
         f"No parser could read {path}" + (f": {last_exc}" if last_exc else ""),
         path,
     )

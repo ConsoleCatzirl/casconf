@@ -14,22 +14,22 @@ CHANGES
 * Added dual MIT/GPL-3.0 license
 * Set up pbr for build and version management
 * Set up Pipenv for dependency management
-* Implemented the complete ``cascconf`` Python package:
+* Implemented the complete ``casconf`` Python package:
 
-  * ``cascconf.api`` — ``merge_configs()`` public entry point
-  * ``cascconf.cli`` — ``argparse``-based CLI (``cascconf`` command)
-  * ``cascconf.discovery`` — ``DiscoveryConfig`` and directory scanner
-  * ``cascconf.merger`` — deep and shallow merge strategies
-  * ``cascconf.parser`` — extension-based format detection with fallback chain
-  * ``cascconf.registry`` — pluggable parser/writer registry
-  * ``cascconf.writer`` — serialise to JSON, YAML, or TOML
-  * ``cascconf.exceptions`` — typed exception hierarchy
-  * ``cascconf.__main__`` — ``python -m cascconf`` support
+  * ``casconf.api`` — ``merge_configs()`` public entry point
+  * ``casconf.cli`` — ``argparse``-based CLI (``casconf`` command)
+  * ``casconf.discovery`` — ``DiscoveryConfig`` and directory scanner
+  * ``casconf.merger`` — deep and shallow merge strategies
+  * ``casconf.parser`` — extension-based format detection with fallback chain
+  * ``casconf.registry`` — pluggable parser/writer registry
+  * ``casconf.writer`` — serialise to JSON, YAML, or TOML
+  * ``casconf.exceptions`` — typed exception hierarchy
+  * ``casconf.__main__`` — ``python -m casconf`` support
   * ``py.typed`` marker for PEP 561 inline type information
 
 * Added 99 unit tests across 7 test modules; coverage threshold set to 90%
 * Added test fixtures for base, override, and extra merge scenarios
-* Made ``pyyaml`` and ``tomli-w``/``tomli`` optional package extras (``cascconf[yaml]`` and ``cascconf[toml]``)
+* Made ``pyyaml`` and ``tomli-w``/``tomli`` optional package extras (``casconf[yaml]`` and ``casconf[toml]``)
 * Removed ``validate_config`` to simplify the public API
 * Simplified the parser: removed internal ``run()`` helper
 * Updated API.md to reflect the simplified interfaces
