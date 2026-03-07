@@ -78,3 +78,14 @@ class TestWriteEmptyDict:
         write({}, output=dest, fmt="json")
         data = json.loads(dest.read_text(encoding="utf-8"))
         assert data == {}
+
+
+class TestWriteToml:
+    """write() with TOML output format."""
+
+    def test_toml_output_is_written(self, tmp_path):
+        dest = tmp_path / "out.toml"
+        write({"name": "casconf", "version": "1.0"}, output=dest, fmt="toml")
+        assert dest.exists()
+        content = dest.read_text(encoding="utf-8")
+        assert "casconf" in content

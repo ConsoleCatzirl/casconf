@@ -63,9 +63,7 @@ class DiscoveryConfig:
         if not patterns:
             raise CasConfConfigError("'patterns' must contain at least one entry.")
         if merge_strategy not in _VALID_STRATEGIES:
-            raise CasConfConfigError(
-                f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}"
-            )
+            raise CasConfConfigError(f"Invalid merge_strategy {merge_strategy!r}. Must be one of: {sorted(_VALID_STRATEGIES)}")
 
         self.directories: list[Path] = [Path(os.path.expandvars(os.path.expanduser(str(d)))) for d in directories]
         self.patterns: list[str] = list(patterns)

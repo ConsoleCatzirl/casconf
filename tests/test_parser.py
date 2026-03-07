@@ -96,3 +96,26 @@ class TestParseErrors:
         f.write_text('{"key": "value"}', encoding="utf-8")
         result = parse(f)
         assert result == {"key": "value"}
+
+
+class TestParseToml:
+    """parse() with TOML files."""
+
+    def test_parses_toml_file(self, tmp_path):
+        f = tmp_path / "config.toml"
+        f.write_text(
+            '[database]\nhost = "localhost"\nport = 5432\n',
+            encoding="utf-8",
+        )
+        result = parse(f)
+        assert result["database"]["host"] == "localhost"
+
+
+class TestParserFallbackAllFail:
+    """parse() raises CasConfParseError when every parser attempt fails."""
+
+    def test_truly_unparseable_file_raises(self, tmp_path):
+        f = tmp_path / "garbage.unknown"
+        f.write_bytes(b"\xff\xfe\xfd")  # invalid for all text parsers
+        with pytest.raises(CasConfParseError):
+            parse(f)

@@ -125,3 +125,72 @@ class TestMainCli:
         assert data["database"]["port"] == 5433
         # base has host; override does not -> should be preserved
         assert data["database"]["host"] == "localhost"
+
+
+class TestConfigureLogging:
+    """_configure_logging() sets up the root logger correctly."""
+
+    def test_verbose_calls_basicconfig_with_debug(self, monkeypatch):
+        import logging
+
+        from casconf.cli import _configure_logging
+
+        captured: list[int] = []
+
+        def fake_basicconfig(**kwargs: object) -> None:
+            captured.append(kwargs.get("level"))  # type: ignore[arg-type]
+
+        monkeypatch.setattr(logging, "basicConfig", fake_basicconfig)
+        _configure_logging(verbose=True)
+        assert captured == [logging.DEBUG]
+
+
+class TestUnexpectedException:
+    """main() returns exit code 1 on unexpected (non-CasConf) exceptions."""
+
+    def test_unexpected_exception_returns_1(self, tmp_path, monkeypatch):
+        import yaml
+
+        import casconf.cli as cli_module
+
+        dc = tmp_path / "casconf.yaml"
+        dc.write_text(
+            yaml.dump(
+                {
+                    "directories": [str(FIXTURES / "base")],
+                    "patterns": ["config.json"],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        # Patch write to raise an unexpected (non-CasConf) exception
+        monkeypatch.setattr(
+            cli_module,
+            "write",
+            lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("unexpected")),
+        )
+
+        rc = cli_module.main(["--discovery-config", str(dc)])
+        assert rc == 1
+
+
+class TestGetVersion:
+    """_get_version() falls back gracefully when the package is not installed."""
+
+    def test_returns_fallback_on_package_not_found(self, monkeypatch):
+        from importlib.metadata import PackageNotFoundError
+
+        def raise_not_found(name: str) -> str:
+            raise PackageNotFoundError(name)
+
+        monkeypatch.setattr("importlib.metadata.version", raise_not_found)
+        from casconf.cli import _get_version
+
+        assert _get_version() == "casconf (version unknown)"
+
+    def test_returns_version_string_when_installed(self):
+        from casconf.cli import _get_version
+
+        v = _get_version()
+        assert v.startswith("casconf ")

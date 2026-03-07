@@ -177,9 +177,7 @@ def _write_yaml(data: dict[str, Any], stream: io.TextIOBase) -> None:
     try:
         import yaml  # pyyaml
     except ImportError as exc:
-        raise ImportError(
-            "YAML support requires the 'pyyaml' package. " "Install it with: pip install casconf[yaml]"
-        ) from exc
+        raise ImportError("YAML support requires the 'pyyaml' package. " "Install it with: pip install casconf[yaml]") from exc
 
     yaml.dump(
         data,
