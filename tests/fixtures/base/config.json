@@ -1,0 +1,19 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "myapp",
+    "credentials": {
+      "username": "admin"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json"
+  },
+  "features": {
+    "cache": false,
+    "analytics": false
+  },
+  "plugins": ["auth"]
+}
