@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyyaml = ">=6.0"
-tomli-w = ">=1.0"
 
 [dev-packages]
 pytest = ">=7.0"
@@ -15,14 +13,17 @@ black = ">=23.0"
 isort = ">=5.12"
 mypy = ">=1.0"
 pre-commit = ">=3.0"
+pyyaml = ">=6.0"
 types-pyyaml = ">=6.0"
+tomli-w = ">=1.0"
+tomli = ">=2.0.0"
 
 [requires]
 python_version = "3.10"
 
 [scripts]
 test = "pytest"
-test-cov = "pytest --cov=cascconf --cov-report=html"
+test-cov = "pytest --cov=cascconf --cov-report=term-missing"
 lint = "flake8 cascconf tests"
 format = "black cascconf tests"
 format-check = "black --check cascconf tests"

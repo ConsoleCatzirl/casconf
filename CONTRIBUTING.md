@@ -40,13 +40,15 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 3. **Run the tests** to ensure nothing is broken:
    ```bash
-   pytest
+   pipenv run test
    ```
 
-4. **Run the linter** to ensure PEP 8 compliance:
+4. **Run the linters and formatters** to ensure PEP 8 compliance:
    ```bash
-   ruff check .
-   ruff format --check .
+   pipenv run lint
+   pipenv run format-check
+   pipenv run sort-imports-check
+   pipenv run typecheck
    ```
 
 5. **Update documentation** if your change affects the public API or CLI interface.
@@ -59,8 +61,9 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 ### Prerequisites
 
-- Python 3.9 or later
+- Python 3.10 or later
 - `git`
+- `pipenv` (`pip install pipenv`)
 
 ### Setup
 
@@ -69,12 +72,11 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 git clone https://github.com/<your-username>/cascconf.git
 cd cascconf
 
-# Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Install all dependencies (including dev) into a managed virtualenv
+pipenv install --dev
 
-# Install the package in editable mode with development dependencies
-pip install -e ".[dev]"
+# Activate the virtual environment
+pipenv shell
 ```
 
 ### Project Structure
@@ -82,8 +84,9 @@ pip install -e ".[dev]"
 ```
 cascconf/
 ├── cascconf/            # Source package
-│   ├── __init__.py      # Public API
-│   ├── __main__.py      # CLI entry point
+│   ├── __init__.py      # Public API re-exports
+│   ├── __main__.py      # CLI entry point (python -m cascconf)
+│   ├── api.py           # Public API implementation
 │   ├── cli.py           # CLI argument parsing
 │   ├── discovery.py     # Discovery Engine
 │   ├── parser.py        # Parser Engine
@@ -93,12 +96,13 @@ cascconf/
 │   └── exceptions.py    # Exception hierarchy
 ├── tests/
 │   ├── fixtures/        # Sample configuration files for tests
+│   ├── test_cli.py
+│   ├── test_coverage.py
 │   ├── test_discovery.py
-│   ├── test_parser.py
+│   ├── test_exceptions.py
 │   ├── test_merger.py
-│   ├── test_writer.py
-│   └── test_cli.py
-├── docs/                # Additional documentation
+│   ├── test_parser.py
+│   └── test_writer.py
 ├── ARCHITECTURE.md
 ├── API.md
 ├── CONTRIBUTING.md
@@ -106,6 +110,7 @@ cascconf/
 ├── LICENSE
 ├── USAGE.md
 ├── README.md
+├── Pipfile
 └── pyproject.toml
 ```
 
@@ -115,46 +120,49 @@ cascconf/
 
 ```bash
 # Run all tests
-pytest
+pipenv run test
 
 # Run with coverage report
-pytest --cov=cascconf --cov-report=term-missing
+pipenv run test-cov
 
 # Run a specific test file
-pytest tests/test_merger.py
+pipenv run test tests/test_merger.py
 
 # Run a specific test
-pytest tests/test_merger.py::test_deep_merge_nested_dicts
+pipenv run test tests/test_merger.py::TestDeepMerge::test_merges_nested_dicts
 
 # Run tests matching a keyword
-pytest -k "merge"
+pipenv run test -k "merge"
 ```
 
 ---
 
 ## Code Style
 
-CascConf follows **PEP 8 strictly**. The project uses `ruff` for linting and formatting.
+CascConf follows **PEP 8 strictly**. The project uses `black` for formatting, `isort` for import ordering, and `flake8` for linting.
 
 ### Linting and Formatting
 
 ```bash
-# Check for issues
-ruff check .
+# Check for linting issues
+pipenv run lint
 
-# Auto-fix issues where possible
-ruff check --fix .
+# Auto-format code
+pipenv run format
 
-# Check formatting
-ruff format --check .
+# Check formatting without applying changes
+pipenv run format-check
 
-# Apply formatting
-ruff format .
+# Sort imports
+pipenv run sort-imports
+
+# Check import order without applying changes
+pipenv run sort-imports-check
 ```
 
 ### Style Rules
 
-- **Line length**: 88 characters maximum.
+- **Line length**: 79 characters maximum.
 - **Imports**: Grouped as stdlib → third-party → local, separated by blank lines.
 - **Type hints**: Required for all public functions and methods.
 - **Docstrings**: Required for all public modules, classes, and functions.
