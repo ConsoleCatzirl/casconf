@@ -46,7 +46,7 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 │           │  [list of parsed configuration dicts]               │
 │           ▼                                                     │
 │  ┌──────────────────┐                                           │
-│  │   Merger Engine  │  Deep-merges configurations in order     │
+│  │   Merger Engine  │  Merges configurations in order          │
 │  └────────┬─────────┘                                           │
 │           │  [single merged configuration dict]                 │
 │           ▼                                                     │
@@ -68,7 +68,7 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 **Responsibility**: Locate configuration files based on a discovery configuration.
 
 **Inputs**:
-- A `DiscoveryConfig` object specifying directories, file patterns, and merge strategy.
+- A `DiscoveryConfig` object specifying directories, file patterns, merge strategy, and list merge strategy.
 
 **Outputs**:
 - An ordered list of file paths to merge, from lowest to highest priority.
@@ -79,6 +79,32 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 - Skips directories that do not exist or are not readable (with a warning).
 - Expands `~` (home directory) and environment variables in directory paths.
 - Supports glob patterns in directory paths (e.g., `./plugins/*/config`).
+
+**Environment Variable Expansion in Paths**:
+
+Directory paths in the discovery configuration are expanded using `os.path.expandvars()` before scanning. This means any environment variable can be embedded in a directory path, enabling host-specific or role-specific configuration lookups.
+
+A common use case is including the machine's fully qualified domain name (FQDN) in the directory path so that host-specific overrides are discovered automatically:
+
+```yaml
+# casconf.yaml
+directories:
+  - /etc/myapp/defaults
+  - /etc/myapp/$HOSTNAME        # host-specific directory, e.g. /etc/myapp/web-01.example.com
+  - ~/.config/myapp
+patterns:
+  - "config.yaml"
+  - "config.json"
+```
+
+Set the environment variable before running:
+
+```bash
+export HOSTNAME=$(hostname -f)   # fully qualified domain name
+casconf --output ./merged.json
+```
+
+Any environment variable is supported — `$HOSTNAME`, `$FQDN`, `$ENVIRONMENT`, `$DATACENTER`, or any custom variable you define.
 
 ---
 
@@ -113,6 +139,7 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 **Inputs**:
 - An ordered list of Python dicts (from lowest to highest priority).
 - A merge strategy (`deep` or `shallow`).
+- A list merge strategy (`append` or `replace`), used only with deep merge.
 
 **Outputs**:
 - A single Python dict representing the merged configuration.
@@ -120,8 +147,28 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 **Behavior (Deep Merge)**:
 - Scalars (strings, numbers, booleans, null): later value replaces earlier value.
 - Dicts: recursively merged key by key.
-- Lists: later list is appended to earlier list (concatenation).
+- Lists: controlled by the **list merge strategy** (see below).
 - Type conflicts (e.g., a scalar in one file and a dict in another): later type wins, with a warning.
+
+**List Merge Strategy**:
+
+| Strategy | Behavior |
+|----------|----------|
+| `append` (default) | Later list is appended to earlier list (concatenation). |
+| `replace` | Later list entirely replaces earlier list. |
+
+Configure via the `list_merge_strategy` key in the discovery configuration file:
+
+```yaml
+# casconf.yaml
+directories:
+  - /etc/myapp
+  - ~/.config/myapp
+patterns:
+  - "config.yaml"
+merge_strategy: deep
+list_merge_strategy: replace   # or 'append' (default)
+```
 
 **Behavior (Shallow Merge)**:
 - Top-level keys from later dicts replace top-level keys from earlier dicts entirely (no recursion).
@@ -168,9 +215,9 @@ User
   │
   │  casconf --discovery-config ./casconf.yaml --output ./merged.json
   ▼
-CLI Entry Point (casconf/__main__.py)
+CLI Entry Point (casconf/cli.py)
   │
-  │  Parses CLI arguments
+  │  Parses CLI arguments (flags or environment variables)
   │  Loads discovery config from file
   ▼
 DiscoveryConfig object
@@ -201,7 +248,7 @@ Python Application
   │
   │  merge_configs(discovery_config='./casconf.yaml')
   ▼
-Public API (casconf/__init__.py)
+Public API (casconf/api.py)
   │
   │  Accepts file path or DiscoveryConfig object
   ▼
@@ -228,7 +275,7 @@ Python dict (or file on disk)
 
 ```
 casconf/
-├── __init__.py          # Public API: merge_configs(), validate_config(), DiscoveryConfig
+├── __init__.py          # Public API: merge_configs(), DiscoveryConfig
 ├── __main__.py          # CLI entry point
 ├── cli.py               # CLI argument parsing and orchestration
 ├── discovery.py         # Discovery Engine: DiscoveryConfig, file scanning
@@ -242,10 +289,32 @@ casconf/
 
 ---
 
+## CLI Environment Variables
+
+All CLI options can be set via environment variables. Command-line flags take precedence over environment variables.
+
+| Environment Variable | Corresponding Flag | Description |
+|---|---|---|
+| `CASCCONF_DISCOVERY` | `--discovery-config` | Path to the discovery configuration file |
+| `CASCCONF_OUTPUT` | `--output` | Output file path (stdout if unset) |
+| `CASCCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
+| `CASCCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
+| `CASCCONF_LOG_LEVEL` | _(no flag)_ | Log level when `--verbose` is not set (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+
+**Example**:
+
+```bash
+export CASCCONF_FORMAT=yaml
+export CASCCONF_OUTPUT=/var/cache/myapp/config.yaml
+casconf
+```
+
+---
+
 ## Key Design Patterns
 
 ### Strategy Pattern
-The merge strategy (`deep` vs `shallow`) and output format (`json`, `yaml`, `toml`) are implemented as interchangeable strategies. The Merger Engine and Writer Engine accept a strategy parameter and delegate to the appropriate implementation.
+The merge strategy (`deep` vs `shallow`), list merge strategy (`append` vs `replace`), and output format (`json`, `yaml`, `toml`) are implemented as interchangeable strategies. The Merger Engine and Writer Engine accept a strategy parameter and delegate to the appropriate implementation.
 
 ### Factory Pattern
 The Parser Engine uses a factory to instantiate the correct parser for a given file extension. The Configuration Registry acts as the factory registry.
@@ -269,7 +338,6 @@ Configuration files are processed in a chain: each file's parsed dict is passed 
 | `CasConfParseError` | Failed to parse a configuration file |
 | `CasConfMergeError` | Irreconcilable merge conflict |
 | `CasConfWriteError` | Failed to write output |
-| `CasConfValidationError` | Configuration failed schema validation |
 
 ### Strategy
 - **Fail fast on configuration errors**: A malformed discovery config raises immediately.
@@ -293,26 +361,33 @@ Configuration files are processed in a chain: each file's parsed dict is passed 
 - **Unit tests** for each engine component in isolation.
 - **Integration tests** for end-to-end CLI and library usage.
 - **Fixture-based tests** using sample configuration files in `tests/fixtures/`.
-- **Property-based tests** for the merge algorithm (using `hypothesis`).
+
+Run the test suite with:
+
+```bash
+pipenv run test            # all tests
+pipenv run test-cov        # with coverage report
+```
 
 ---
 
 ## Dependencies
 
 ### Required
-- Python 3.9+
-- `pyyaml` — YAML parsing and serialization
+- Python 3.10+
 
 ### Optional
+- `pyyaml` — YAML parsing and serialization
 - `tomli` — TOML parsing on Python < 3.11 (Python 3.11+ includes `tomllib`)
 - `tomli-w` — TOML serialization
 
 ### Development
 - `pytest` — Test runner
 - `pytest-cov` — Coverage reporting
-- `hypothesis` — Property-based testing
 - `mypy` — Static type checking
-- `ruff` — Linting and formatting
+- `black` — Code formatting
+- `isort` — Import sorting
+- `flake8` — Linting
 
 ---
 

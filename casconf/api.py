@@ -75,7 +75,7 @@ def merge_configs(
 
     paths = discover(discovery_config)
     configs = [parse(p) for p in paths]
-    merged = merge(configs, strategy=discovery_config.merge_strategy)
+    merged = merge(configs, strategy=discovery_config.merge_strategy, list_strategy=discovery_config.list_merge_strategy)
 
     if output is not None:
         write(merged, output=output, fmt=output_format)

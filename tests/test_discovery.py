@@ -47,12 +47,24 @@ class TestDiscoveryConfigConstruction:
         )
         assert dc.merge_strategy == "shallow"
 
-    def test_invalid_merge_strategy_raises(self):
-        with pytest.raises(CasConfConfigError, match="merge_strategy"):
+    def test_custom_list_merge_strategy(self):
+        dc = DiscoveryConfig(
+            directories=["/tmp"],
+            patterns=["*.yaml"],
+            list_merge_strategy="replace",
+        )
+        assert dc.list_merge_strategy == "replace"
+
+    def test_default_list_merge_strategy_is_append(self):
+        dc = DiscoveryConfig(directories=["/tmp"], patterns=["*.json"])
+        assert dc.list_merge_strategy == "append"
+
+    def test_invalid_list_merge_strategy_raises(self):
+        with pytest.raises(CasConfConfigError, match="list_merge_strategy"):
             DiscoveryConfig(
                 directories=["/tmp"],
                 patterns=["*.json"],
-                merge_strategy="invalid",
+                list_merge_strategy="invalid",
             )
 
     def test_empty_directories_raises(self):
@@ -88,6 +100,19 @@ class TestDiscoveryConfigFromDict:
     def test_merge_strategy_defaults_to_deep(self):
         dc = DiscoveryConfig.from_dict({"directories": ["/tmp"], "patterns": ["*.json"]})
         assert dc.merge_strategy == "deep"
+
+    def test_list_merge_strategy_defaults_to_append(self):
+        dc = DiscoveryConfig.from_dict({"directories": ["/tmp"], "patterns": ["*.json"]})
+        assert dc.list_merge_strategy == "append"
+
+    def test_list_merge_strategy_from_dict(self):
+        data = {
+            "directories": ["/tmp"],
+            "patterns": ["config.json"],
+            "list_merge_strategy": "replace",
+        }
+        dc = DiscoveryConfig.from_dict(data)
+        assert dc.list_merge_strategy == "replace"
 
 
 class TestDiscover:
