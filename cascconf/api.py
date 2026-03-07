@@ -1,10 +1,9 @@
 """CascConf public API implementations.
 
-The two main public functions — :func:`merge_configs` and
-:func:`validate_config` — live here so that ``cascconf/__init__.py``
-stays thin.  Both are re-exported from the top-level package::
+:func:`merge_configs` lives here so that ``cascconf/__init__.py``
+stays thin.  It is re-exported from the top-level package::
 
-    from cascconf import merge_configs, validate_config
+    from cascconf import merge_configs
 """
 
 from __future__ import annotations
@@ -15,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from cascconf.discovery import DiscoveryConfig
-from cascconf.exceptions import CascConfValidationError
 
 _ENV_DISCOVERY = "CASCCONF_DISCOVERY"
 _DEFAULT_DISCOVERY = "cascconf.yaml"
@@ -84,47 +82,3 @@ def merge_configs(
         return None
 
     return merged
-
-
-def validate_config(
-    config: dict[str, Any],
-    schema: str | Path | dict[str, Any],
-) -> None:
-    """Validate *config* against a JSON Schema.
-
-    Args:
-        config: The configuration dict to validate.
-        schema: Path to a JSON Schema file, or an inline schema dict.
-
-    Raises:
-        CascConfValidationError: If the configuration does not match
-            the schema.
-        ImportError: If ``jsonschema`` is not installed.  Install it
-            with ``pip install cascconf[validation]``.
-    """
-    try:
-        import jsonschema
-    except ImportError as exc:
-        raise ImportError(
-            "Schema validation requires the 'jsonschema' package. "
-            "Install it with: pip install cascconf[validation]"
-        ) from exc
-
-    if not isinstance(schema, dict):
-        # Load schema from file
-        from cascconf.parser import parse as _parse
-
-        schema = _parse(Path(schema))
-
-    validator = jsonschema.Draft7Validator(schema)
-    errors = sorted(
-        validator.iter_errors(config), key=lambda e: list(e.path)
-    )
-    if errors:
-        messages = [e.message for e in errors]
-        raise CascConfValidationError(
-            f"Configuration validation failed with "
-            f"{len(messages)} error(s): "
-            + "; ".join(messages),
-            errors=messages,
-        )

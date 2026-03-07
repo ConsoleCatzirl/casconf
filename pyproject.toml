@@ -43,12 +43,16 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed"
 ]
-dependencies = [
-    "pyyaml>=6.0",
-    "tomli-w>=1.0"
-]
+dependencies = []
 
 [project.optional-dependencies]
+yaml = [
+    "pyyaml>=6.0"
+]
+toml = [
+    "tomli-w>=1.0",
+    "tomli>=2.0.0; python_version < '3.11'"
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -57,10 +61,9 @@ dev = [
     "isort>=5.12",
     "mypy>=1.0",
     "pre-commit>=3.0",
-    "types-pyyaml>=6.0"
-]
-validation = [
-    "jsonschema>=4.0"
+    "pyyaml>=6.0",
+    "types-pyyaml>=6.0",
+    "tomli-w>=1.0"
 ]
 
 [project.scripts]

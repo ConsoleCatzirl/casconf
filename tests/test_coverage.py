@@ -13,12 +13,12 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 # ---------------------------------------------------------------------------
-# cascconf/api.py  (merge_configs / validate_config)
+# cascconf/api.py  (merge_configs)
 # ---------------------------------------------------------------------------
 
 
 class TestMergeConfigsPublicApi:
-    """Covers cascconf/api.py merge_configs and validate_config."""
+    """Covers cascconf/api.py merge_configs."""
 
     def test_returns_dict_when_no_output(self, tmp_path):
         """merge_configs() returns dict when output=None."""
@@ -81,40 +81,6 @@ class TestMergeConfigsPublicApi:
         monkeypatch.setenv("CASCCONF_DISCOVERY", str(dc))
         result = merge_configs(discovery_config=None)
         assert isinstance(result, dict)
-
-    def test_validate_config_passes_valid_schema(self):
-        """validate_config() does not raise for a conforming dict."""
-        from cascconf import validate_config
-
-        schema = {
-            "type": "object",
-            "properties": {"host": {"type": "string"}},
-        }
-        validate_config({"host": "localhost"}, schema=schema)
-
-    def test_validate_config_raises_on_invalid(self):
-        """validate_config() raises CascConfValidationError."""
-        from cascconf import validate_config
-        from cascconf.exceptions import CascConfValidationError
-
-        schema = {
-            "type": "object",
-            "required": ["host"],
-            "properties": {"host": {"type": "string"}},
-        }
-        with pytest.raises(CascConfValidationError) as exc_info:
-            validate_config({}, schema=schema)
-        assert exc_info.value.errors
-
-    def test_validate_config_loads_schema_from_file(self, tmp_path):
-        """validate_config() accepts a path to a JSON schema file."""
-        from cascconf import validate_config
-
-        schema_file = tmp_path / "schema.json"
-        schema_file.write_text(
-            json.dumps({"type": "object"}), encoding="utf-8"
-        )
-        validate_config({"a": 1}, schema=str(schema_file))
 
 
 # ---------------------------------------------------------------------------
@@ -280,8 +246,64 @@ class TestRegistryTomlParser:
 
 
 # ---------------------------------------------------------------------------
-# cascconf/cli.py  (verbose logging, unexpected exception — 119, 204-209)
+# cascconf/registry.py  (optional dep ImportError paths)
 # ---------------------------------------------------------------------------
+
+
+class TestRegistryOptionalDepErrors:
+    """Verify helpful ImportError messages when optional deps are absent."""
+
+    @staticmethod
+    def _blocking_import(blocked_name: str):
+        """Return an ``__import__`` replacement that blocks *blocked_name*."""
+        import builtins
+
+        real_import = builtins.__import__
+
+        def fake_import(name: str, *args, **kwargs):  # type: ignore[no-untyped-def]
+            if name == blocked_name:
+                raise ImportError(f"No module named '{blocked_name}'")
+            return real_import(name, *args, **kwargs)
+
+        return fake_import
+
+    def test_parse_yaml_missing_pyyaml(self, tmp_path, monkeypatch):
+        import builtins
+
+        import cascconf.registry as reg_module
+
+        f = tmp_path / "config.yaml"
+        f.write_text("key: value\n", encoding="utf-8")
+        monkeypatch.setattr(
+            builtins, "__import__", self._blocking_import("yaml")
+        )
+        with pytest.raises(ImportError, match="cascconf\\[yaml\\]"):
+            reg_module._parse_yaml(f)
+
+    def test_write_yaml_missing_pyyaml(self, monkeypatch):
+        import builtins
+        import io
+
+        import cascconf.registry as reg_module
+
+        monkeypatch.setattr(
+            builtins, "__import__", self._blocking_import("yaml")
+        )
+        with pytest.raises(ImportError, match="cascconf\\[yaml\\]"):
+            reg_module._write_yaml({"k": "v"}, io.StringIO())
+
+    def test_write_toml_missing_tomli_w(self, monkeypatch):
+        import builtins
+        import io
+
+        import cascconf.registry as reg_module
+
+        monkeypatch.setattr(
+            builtins, "__import__", self._blocking_import("tomli_w")
+        )
+        with pytest.raises(ImportError, match="cascconf\\[toml\\]"):
+            reg_module._write_toml({"k": "v"}, io.StringIO())
+
 
 
 class TestCliConfigureLogging:

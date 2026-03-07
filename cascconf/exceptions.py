@@ -52,15 +52,3 @@ class CascConfWriteError(CascConfError):
     This covers permission-denied errors, invalid output paths,
     and unsupported output formats.
     """
-
-
-class CascConfValidationError(CascConfError):
-    """Raised when the configuration fails schema validation.
-
-    Attributes:
-        errors: List of human-readable validation error messages.
-    """
-
-    def __init__(self, message: str, errors: list[str]) -> None:
-        super().__init__(message)
-        self.errors: list[str] = errors
