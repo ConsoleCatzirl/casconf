@@ -13,9 +13,7 @@ pip install casconf
 ### From Source
 
 ```bash
-git clone https://github.com/ConsoleCatzirlI/casconf.git
-cd casconf
-pip install -e .
+pip install git+https://github.com/ConsoleCatzirl/casconf.git@main
 ```
 
 ### Verify Installation

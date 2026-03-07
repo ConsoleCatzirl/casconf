@@ -14,8 +14,6 @@ This document explains the key design decisions made for CasConf, including the 
 
 - Secret management or encryption.
 - Configuration deployment or distribution.
-- Runtime configuration reloading (watch mode is a future consideration).
-- Schema validation of application-specific configuration (out of scope for v1).
 - Support for binary configuration formats.
 
 ---
@@ -173,17 +171,6 @@ These targets are met by the simple in-memory merge algorithm. No caching or ind
 - **Path traversal**: Directory paths are resolved to absolute paths before use. Paths outside the filesystem root are rejected.
 - **Symlink following**: Symlinks in configuration directories are followed by default. This is the standard behavior and allows flexible directory layouts.
 - **No code execution**: CasConf never executes code from configuration files. YAML's `yaml.safe_load` is used (not `yaml.load`).
-- **No network access**: CasConf does not make network requests in v1. Remote sources are a future feature.
-
----
-
-## Alternative Names Considered
-
-- **layerconf**: Descriptive but less evocative of the cascading behavior.
-- **mergeconf**: Accurate but loses the cascade metaphor.
-- **confcascade**: Awkward word order.
-- **stackconf**: Implies a stack data structure, less intuitive.
-- **CasConf**: Concise, memorable, and clearly describes the cascading configuration concept.
 
 ---
 
@@ -191,7 +178,5 @@ These targets are met by the simple in-memory merge algorithm. No caching or ind
 
 - **Replace directive**: A `!replace` YAML tag or `__replace: true` key to indicate that a list or dict should replace (not merge) the value from the previous level.
 - **Merge exclusions**: A way to specify keys that should not be merged (e.g., secrets injected at runtime).
-- **Remote sources**: Fetch configuration from S3, GCS, HTTP, or Vault.
-- **Watch mode**: Re-run the merge when source files change and notify the application via a signal or file.
 - **Source tracking**: Annotate the merged output with source file provenance for debugging.
 - **Schema validation**: Built-in JSON Schema validation with per-key error messages.

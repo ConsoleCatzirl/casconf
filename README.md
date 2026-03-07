@@ -29,14 +29,16 @@ CasConf scans a configurable list of directories for matching configuration file
 pip install casconf
 
 # Basic usage - merge configs and output to stdout
-casconf
+casconf --discovery-config ./casconf.yaml
 
 # Output to a file
-casconf --output /path/to/output/config.json
+casconf --discovery-config ./casconf.yaml --output config.json
 
-# Specify custom discovery configuration
-casconf --discovery-config ./casconf.yaml --output ./merged.json
+# Specify discovery configuration via environment variable
+CASCONF_DISCOVERY=./casconf.yaml casconf
+```
 
+```python
 # Use as a library
 from casconf import merge_configs
 
@@ -63,9 +65,7 @@ See [USAGE.md](USAGE.md) for detailed examples.
 pip install casconf
 
 # From source
-git clone https://github.com/ConsoleCatzirlI/casconf.git
-cd casconf
-pip install -e .
+pip install git+https://github.com/ConsoleCatzirl/casconf.git@main
 ```
 
 ## Basic Usage
