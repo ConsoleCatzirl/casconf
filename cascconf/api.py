@@ -13,7 +13,10 @@ import os
 from pathlib import Path
 from typing import Any
 
-from cascconf.discovery import DiscoveryConfig
+from cascconf.discovery import DiscoveryConfig, discover
+from cascconf.merger import merge
+from cascconf.parser import parse
+from cascconf.writer import write
 
 _ENV_DISCOVERY = "CASCCONF_DISCOVERY"
 _DEFAULT_DISCOVERY = "cascconf.yaml"
@@ -62,20 +65,21 @@ def merge_configs(
             output='./merged.json',
         )
     """
-    from cascconf.cli import run
-    from cascconf.writer import write
+    logging.getLogger("cascconf").setLevel(log_level)
 
     if discovery_config is None:
         discovery_config = os.environ.get(
             _ENV_DISCOVERY, _DEFAULT_DISCOVERY
         )
 
-    merged = run(
-        discovery_config=discovery_config,
-        output=None,  # Always collect the dict first
-        output_format=output_format,
-        log_level=log_level,
-    )
+    if not isinstance(discovery_config, DiscoveryConfig):
+        discovery_config = DiscoveryConfig.from_file(
+            Path(discovery_config)
+        )
+
+    paths = discover(discovery_config)
+    configs = [parse(p) for p in paths]
+    merged = merge(configs, strategy=discovery_config.merge_strategy)
 
     if output is not None:
         write(merged, output=output, fmt=output_format)

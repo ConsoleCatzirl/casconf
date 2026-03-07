@@ -50,7 +50,13 @@ def parse(path: Path) -> dict[str, Any]:
             path,
             suffix or "unknown",
         )
-        return _try_parse(parser_fn, path)
+        try:
+            return parser_fn(path)
+        except Exception as exc:
+            raise CascConfParseError(
+                f"Failed to parse {path}: {exc}",
+                path,
+            ) from exc
 
     # Fallback: try every registered parser
     logger.debug(
@@ -60,11 +66,8 @@ def parse(path: Path) -> dict[str, Any]:
     )
     last_exc: Exception | None = None
     for ext in registry.supported_extensions:
-        fn = registry.get_parser(ext)
-        if fn is None:
-            continue
         try:
-            result = fn(path)
+            result = registry.get_parser(ext)(path)  # type: ignore[misc]
             logger.debug(
                 "Parsed %s successfully with %s parser",
                 path,
@@ -79,28 +82,3 @@ def parse(path: Path) -> dict[str, Any]:
         + (f": {last_exc}" if last_exc else ""),
         path,
     )
-
-
-def _try_parse(
-    parser_fn: Any,
-    path: Path,
-) -> dict[str, Any]:
-    """Invoke *parser_fn* on *path*, wrapping errors.
-
-    Args:
-        parser_fn: Parser callable registered in the registry.
-        path: Path to the configuration file.
-
-    Returns:
-        Parsed configuration dict.
-
-    Raises:
-        CascConfParseError: If parsing fails.
-    """
-    try:
-        return parser_fn(path)
-    except Exception as exc:
-        raise CascConfParseError(
-            f"Failed to parse {path}: {exc}",
-            path,
-        ) from exc

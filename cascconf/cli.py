@@ -15,25 +15,17 @@ import argparse
 import logging
 import os
 import sys
-from pathlib import Path
 
-from cascconf.discovery import DiscoveryConfig, discover
+from cascconf.api import (
+    _DEFAULT_DISCOVERY,
+    _ENV_DISCOVERY,
+    merge_configs,
+)
 from cascconf.exceptions import CascConfError
-from cascconf.merger import merge
-from cascconf.parser import parse
 from cascconf.writer import write
 
-_ENV_DISCOVERY = "CASCCONF_DISCOVERY"
 _ENV_LOG_LEVEL = "CASCCONF_LOG_LEVEL"
-_DEFAULT_DISCOVERY = "cascconf.yaml"
 _DEFAULT_FORMAT = "json"
-
-_LOG_LEVELS = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-}
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -126,56 +118,13 @@ def _configure_logging(verbose: bool) -> None:
         level = logging.DEBUG
     else:
         env_level = os.environ.get(_ENV_LOG_LEVEL, "WARNING").upper()
-        level = _LOG_LEVELS.get(env_level, logging.WARNING)
+        level = getattr(logging, env_level, logging.WARNING)
 
     logging.basicConfig(
         level=level,
         format="[%(levelname)s] %(message)s",
         stream=sys.stderr,
     )
-
-
-def run(
-    discovery_config: str | Path | DiscoveryConfig = _DEFAULT_DISCOVERY,
-    output: str | Path | None = None,
-    output_format: str = _DEFAULT_FORMAT,
-    log_level: int = logging.WARNING,
-) -> dict:
-    """Discover, parse, merge, and optionally write configuration.
-
-    This is the shared orchestration used by both the CLI entry point
-    and the public library API.
-
-    Args:
-        discovery_config: Path to a discovery configuration file,
-            or a :class:`~cascconf.discovery.DiscoveryConfig` object.
-        output: Destination file path, or ``None`` to return the
-            merged dict (and let the caller handle output).
-        output_format: Serialisation format for file output.
-        log_level: Python logging level for this run.
-
-    Returns:
-        The merged configuration as a ``dict``.
-
-    Raises:
-        CascConfError: On any configuration, parse, merge, or write
-            error.
-    """
-    logging.getLogger("cascconf").setLevel(log_level)
-
-    if not isinstance(discovery_config, DiscoveryConfig):
-        discovery_config = DiscoveryConfig.from_file(
-            Path(discovery_config)
-        )
-
-    paths = discover(discovery_config)
-    configs = [parse(p) for p in paths]
-    merged = merge(configs, strategy=discovery_config.merge_strategy)
-
-    if output is not None:
-        write(merged, output=output, fmt=output_format)
-
-    return merged
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -193,17 +142,14 @@ def main(argv: list[str] | None = None) -> int:
     _configure_logging(args.verbose)
 
     try:
-        merged = run(
+        merged = merge_configs(
             discovery_config=args.discovery_config,
-            output=args.output,
             output_format=args.output_format,
             log_level=(
                 logging.DEBUG if args.verbose else logging.WARNING
             ),
         )
-        if args.output is None:
-            # Write to stdout
-            write(merged, output=None, fmt=args.output_format)
+        write(merged, output=args.output, fmt=args.output_format)
     except CascConfError as exc:
         logging.getLogger("cascconf").error("%s", exc)
         print(f"Error: {exc}", file=sys.stderr)

@@ -103,49 +103,6 @@ config = merge_configs(log_level=logging.DEBUG)
 
 ---
 
-### `validate_config()`
-
-Validate a configuration dict against a JSON Schema.
-
-```python
-def validate_config(
-    config: dict[str, Any],
-    schema: str | Path | dict[str, Any],
-) -> None:
-    ...
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `config` | `dict[str, Any]` | The configuration dict to validate. |
-| `schema` | `str`, `Path`, or `dict` | Path to a JSON Schema file, or a schema dict. |
-
-#### Returns
-
-`None` — raises on validation failure.
-
-#### Raises
-
-- `CascConfValidationError`: If the configuration does not match the schema.
-
-#### Example
-
-```python
-from cascconf import merge_configs, validate_config
-from cascconf.exceptions import CascConfValidationError
-
-config = merge_configs(discovery_config='./cascconf.yaml')
-
-try:
-    validate_config(config, schema='./schema.json')
-except CascConfValidationError as e:
-    print(f"Invalid config: {e}")
-```
-
----
-
 ### `DiscoveryConfig`
 
 Configuration object for the CascConf discovery engine.
@@ -239,7 +196,6 @@ from cascconf.exceptions import (
     CascConfParseError,
     CascConfMergeError,
     CascConfWriteError,
-    CascConfValidationError,
 )
 ```
 
@@ -250,8 +206,7 @@ CascConfError (base)
 ├── CascConfConfigError     — Invalid discovery configuration
 ├── CascConfParseError      — Failed to parse a configuration file
 ├── CascConfMergeError      — Irreconcilable merge conflict
-├── CascConfWriteError      — Failed to write output
-└── CascConfValidationError — Configuration failed schema validation
+└── CascConfWriteError      — Failed to write output
 ```
 
 ### `CascConfError`
@@ -302,20 +257,6 @@ Raised when the output file cannot be written (permission denied, invalid path, 
 ```python
 class CascConfWriteError(CascConfError):
     """Raised when the output cannot be written."""
-```
-
-### `CascConfValidationError`
-
-Raised when the merged configuration does not match the provided schema.
-
-```python
-class CascConfValidationError(CascConfError):
-    """Raised when the configuration fails schema validation.
-
-    Attributes:
-        errors: List of validation error messages.
-    """
-    errors: list[str]
 ```
 
 ---
@@ -455,4 +396,4 @@ Log levels:
 
 ## Thread Safety
 
-`merge_configs()` and `validate_config()` are **thread-safe** as long as the underlying configuration files are not modified during the call. `DiscoveryConfig` objects are immutable after construction and safe to share across threads.
+`merge_configs()` is **thread-safe** as long as the underlying configuration files are not modified during the call. `DiscoveryConfig` objects are immutable after construction and safe to share across threads.

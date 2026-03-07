@@ -361,18 +361,18 @@ class TestCliUnexpectedException:
         assert rc == 1
 
 
-class TestCliRunWithDiscoveryConfigObject:
-    """Covers cli.py lines 159→164 (DiscoveryConfig branch in run())."""
+class TestMergeConfigsWithDiscoveryConfigObject:
+    """Covers api.py (DiscoveryConfig branch in merge_configs())."""
 
-    def test_run_accepts_discovery_config_object(self):
-        from cascconf.cli import run
+    def test_merge_configs_accepts_discovery_config_object(self):
+        from cascconf import merge_configs
         from cascconf.discovery import DiscoveryConfig
 
         dc = DiscoveryConfig(
             directories=[str(FIXTURES / "base")],
             patterns=["config.json"],
         )
-        result = run(discovery_config=dc)
+        result = merge_configs(discovery_config=dc)
         assert isinstance(result, dict)
         assert "database" in result
 
