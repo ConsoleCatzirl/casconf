@@ -76,6 +76,65 @@ class TestDiscoveryConfigConstruction:
             DiscoveryConfig(directories=["/tmp"], patterns=[])
 
 
+class TestEnvVarExpansionInPaths:
+    """DiscoveryConfig expands $VAR-style environment variables in directory paths."""
+
+    def test_env_var_expanded_in_directory(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_TEST_DIR"],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == tmp_path
+
+    def test_env_var_brace_syntax_expanded(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["${CASCONF_TEST_DIR}"],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == tmp_path
+
+    def test_env_var_in_path_segment_expanded(self, monkeypatch, tmp_path):
+        subdir = tmp_path / "prod"
+        subdir.mkdir()
+        monkeypatch.setenv("CASCONF_TEST_ENV", "prod")
+        dc = DiscoveryConfig(
+            directories=[str(tmp_path / "$CASCONF_TEST_ENV")],
+            patterns=["*.json"],
+        )
+        assert dc.directories[0] == subdir
+
+    def test_unset_env_var_left_as_literal(self, monkeypatch):
+        monkeypatch.delenv("CASCONF_UNSET_VAR_XYZ", raising=False)
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_UNSET_VAR_XYZ"],
+            patterns=["*.json"],
+        )
+        # os.path.expandvars leaves unset variables unchanged on Unix
+        assert "$CASCONF_UNSET_VAR_XYZ" in str(dc.directories[0])
+
+    def test_env_var_expansion_used_by_discover(self, monkeypatch, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text("{}", encoding="utf-8")
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig(
+            directories=["$CASCONF_TEST_DIR"],
+            patterns=["config.json"],
+        )
+        found = discover(dc)
+        assert len(found) == 1
+        assert found[0] == cfg_file
+
+    def test_env_var_expansion_via_from_dict(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
+        dc = DiscoveryConfig.from_dict({
+            "directories": ["$CASCONF_TEST_DIR"],
+            "patterns": ["*.json"],
+        })
+        assert dc.directories[0] == tmp_path
+
+
 class TestDiscoveryConfigFromDict:
     """DiscoveryConfig.from_dict() constructor."""
 
