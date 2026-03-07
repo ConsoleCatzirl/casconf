@@ -1,11 +1,11 @@
-"""Tests for cascconf.cli (argument parsing and orchestration)."""
+"""Tests for casconf.cli (argument parsing and orchestration)."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-from cascconf.cli import _build_parser, main
+from casconf.cli import _build_parser, main
 
 # Path to the test fixtures directory
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -17,7 +17,7 @@ def _make_discovery_yaml(
     patterns: list[str],
     strategy: str = "deep",
 ) -> Path:
-    """Write a temporary cascconf.yaml and return its path."""
+    """Write a temporary casconf.yaml and return its path."""
     import yaml
 
     cfg = {
@@ -25,7 +25,7 @@ def _make_discovery_yaml(
         "patterns": patterns,
         "merge_strategy": strategy,
     }
-    p = tmp_path / "cascconf.yaml"
+    p = tmp_path / "casconf.yaml"
     p.write_text(yaml.dump(cfg), encoding="utf-8")
     return p
 

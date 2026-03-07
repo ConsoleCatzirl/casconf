@@ -1,12 +1,12 @@
-# CascConf
+# CasConf
 
 **Cascading Configuration Manager**
 
-CascConf is a flexible configuration management tool that deep-merges configuration files across multiple directories following a cascading pattern. It embodies the Unix Philosophy: do one thing well.
+CasConf is a flexible configuration management tool that deep-merges configuration files across multiple directories following a cascading pattern. It embodies the Unix Philosophy: do one thing well.
 
 ## Overview
 
-CascConf scans a configurable list of directories for matching configuration files and intelligently deep-merges them based on discovery order. The result is a single, unified configuration that respects the cascade hierarchy you define.
+CasConf scans a configurable list of directories for matching configuration files and intelligently deep-merges them based on discovery order. The result is a single, unified configuration that respects the cascade hierarchy you define.
 
 ### Key Features
 
@@ -29,24 +29,24 @@ CascConf scans a configurable list of directories for matching configuration fil
 
 ```bash
 # Install
-pip install cascconf
+pip install casconf
 
 # Basic usage - merge configs and output to stdout
-cascconf
+casconf
 
 # Output to a file
-cascconf --output /path/to/output/config.json
+casconf --output /path/to/output/config.json
 
 # Specify custom discovery configuration
-cascconf --discovery-config ./cascconf.yaml --output ./merged.json
+casconf --discovery-config ./casconf.yaml --output ./merged.json
 
 # Use as a library
-from cascconf import merge_configs
+from casconf import merge_configs
 
-config = merge_configs(discovery_config='./cascconf.yaml')
+config = merge_configs(discovery_config='./casconf.yaml')
 
 # Or write directly to file
-merge_configs(discovery_config='./cascconf.yaml', output='./merged.json')
+merge_configs(discovery_config='./casconf.yaml', output='./merged.json')
 ```
 
 See [USAGE.md](USAGE.md) for detailed examples.
@@ -67,11 +67,11 @@ See [USAGE.md](USAGE.md) for detailed examples.
 
 ```bash
 # From PyPI (when published)
-pip install cascconf
+pip install casconf
 
 # From source
-git clone https://github.com/ConsoleCatzirlI/cascconf.git
-cd cascconf
+git clone https://github.com/ConsoleCatzirlI/casconf.git
+cd casconf
 pip install -e .
 ```
 
@@ -81,33 +81,33 @@ pip install -e .
 
 ```bash
 # Merge configs and output to stdout (default)
-cascconf
+casconf
 
 # Output to a file
-cascconf --output ./config.json
+casconf --output ./config.json
 
 # Specify configuration file format for stdout
-cascconf --format yaml
+casconf --format yaml
 
 # Use custom discovery configuration
-cascconf --discovery-config ./custom-discovery.yaml --output ./merged.json
+casconf --discovery-config ./custom-discovery.yaml --output ./merged.json
 
 # Pipe to other tools (Unix Philosophy)
-cascconf | jq '.database'
-cascconf --format yaml | grep "host:"
+casconf | jq '.database'
+casconf --format yaml | grep "host:"
 ```
 
 ### Library Usage
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
 # Merge and return configuration data
-config_data = merge_configs(discovery_config='./cascconf.yaml')
+config_data = merge_configs(discovery_config='./casconf.yaml')
 
 # Merge and write to file in one call
 merge_configs(
-    discovery_config='./cascconf.yaml',
+    discovery_config='./casconf.yaml',
     output='./output/config.json',
     output_format='json'
 )
@@ -115,10 +115,10 @@ merge_configs(
 
 ## Discovery Configuration
 
-CascConf uses a discovery configuration file to determine where to search for configuration files:
+CasConf uses a discovery configuration file to determine where to search for configuration files:
 
 ```yaml
-# cascconf.yaml
+# casconf.yaml
 directories:
   - /etc/myapp
   - ~/.config/myapp

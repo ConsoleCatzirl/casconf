@@ -1,6 +1,6 @@
-# CascConf Design Document
+# CasConf Design Document
 
-This document explains the key design decisions made for CascConf, including the rationale behind each choice and the trade-offs considered.
+This document explains the key design decisions made for CasConf, including the rationale behind each choice and the trade-offs considered.
 
 ## Design Goals
 
@@ -24,7 +24,7 @@ This document explains the key design decisions made for CascConf, including the
 
 ### 1. Cascading Order: Explicit Discovery Configuration
 
-**Decision**: The order in which directories are scanned is defined explicitly in a discovery configuration file (`cascconf.yaml`), not inferred from the environment or hard-coded.
+**Decision**: The order in which directories are scanned is defined explicitly in a discovery configuration file (`casconf.yaml`), not inferred from the environment or hard-coded.
 
 **Rationale**: Implicit discovery orders (e.g., "always check `/etc` first, then `~/.config`, then `.`") are convenient for simple cases but become brittle when applications have non-standard directory layouts. An explicit discovery configuration is:
 - Reproducible: the same config produces the same merge result everywhere.
@@ -57,7 +57,7 @@ This document explains the key design decisions made for CascConf, including the
 
 ### 4. Format Detection: Extension-Based with Fallback
 
-**Decision**: File format is detected from the file extension. If the extension is unknown or absent, CascConf attempts each known parser in order until one succeeds.
+**Decision**: File format is detected from the file extension. If the extension is unknown or absent, CasConf attempts each known parser in order until one succeeds.
 
 **Rationale**: Extension-based detection is fast, predictable, and consistent with how most tools work. The fallback parser chain handles edge cases (files without extensions, non-standard extensions) without requiring user intervention.
 
@@ -67,7 +67,7 @@ This document explains the key design decisions made for CascConf, including the
 
 ### 5. Dual Interface: CLI + Library
 
-**Decision**: CascConf is both a command-line tool and an importable Python library with a clean public API.
+**Decision**: CasConf is both a command-line tool and an importable Python library with a clean public API.
 
 **Rationale**: Configuration management is needed in two contexts:
 - **Build and deployment scripts**: the CLI is simpler and avoids Python import overhead.
@@ -83,7 +83,7 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 
 **Decision**: The CLI writes to stdout by default. The `--output` flag writes to a file. There is no `--dry-run` flag.
 
-**Rationale**: Defaulting to stdout follows the Unix Philosophy and eliminates the need for a `--dry-run` flag. If a user wants to preview the merged configuration without writing to a file, they simply run `cascconf` without `--output`. This is simpler, more composable, and consistent with Unix tools like `cat`, `jq`, and `grep`.
+**Rationale**: Defaulting to stdout follows the Unix Philosophy and eliminates the need for a `--dry-run` flag. If a user wants to preview the merged configuration without writing to a file, they simply run `casconf` without `--output`. This is simpler, more composable, and consistent with Unix tools like `cat`, `jq`, and `grep`.
 
 **Implication**: The absence of a `--dry-run` flag is intentional. stdout *is* the dry run.
 
@@ -93,7 +93,7 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 
 ### 7. Error Handling: Fail Fast vs Continue
 
-**Decision**: CascConf fails fast on errors by default. There is no `--ignore-errors` flag in v1.
+**Decision**: CasConf fails fast on errors by default. There is no `--ignore-errors` flag in v1.
 
 **Rationale**: Silent failures in configuration management are dangerous. If a file cannot be read or parsed, it is better to stop immediately with a clear error than to produce a silently incomplete merged configuration. Missing directories are treated as warnings (not errors) because it is common for some directories in a cascade to not exist on all machines.
 
@@ -103,11 +103,11 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 
 ### 8. Discovery Configuration Location
 
-**Decision**: By default, CascConf looks for `cascconf.yaml` in the current working directory. The `--discovery-config` flag overrides this.
+**Decision**: By default, CasConf looks for `casconf.yaml` in the current working directory. The `--discovery-config` flag overrides this.
 
 **Rationale**: Placing the discovery config in the project directory is consistent with how other tools (`.eslintrc`, `pyproject.toml`, etc.) locate their configuration. It makes the cascade definition visible to anyone working in the project.
 
-**Trade-off**: Projects that do not want a `cascconf.yaml` in their root directory must always use `--discovery-config`. This is a minor inconvenience.
+**Trade-off**: Projects that do not want a `casconf.yaml` in their root directory must always use `--discovery-config`. This is a minor inconvenience.
 
 ---
 
@@ -117,13 +117,13 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 
 **Rationale**: Plugin-based applications often have a variable number of plugin directories. Glob support eliminates the need to list each plugin directory explicitly, making the discovery config maintainable as the plugin set grows.
 
-**Trade-off**: Glob expansion happens at merge time, so the set of directories can change between runs. This is usually desirable (new plugins are picked up automatically) but can cause non-determinism if glob order is not predictable. CascConf sorts glob-expanded paths lexicographically.
+**Trade-off**: Glob expansion happens at merge time, so the set of directories can change between runs. This is usually desirable (new plugins are picked up automatically) but can cause non-determinism if glob order is not predictable. CasConf sorts glob-expanded paths lexicographically.
 
 ---
 
 ### 10. Metadata Preservation
 
-**Decision**: CascConf does not preserve or expose source file metadata (e.g., which file a particular value came from) in the merged output.
+**Decision**: CasConf does not preserve or expose source file metadata (e.g., which file a particular value came from) in the merged output.
 
 **Rationale**: The output is a plain configuration dict/file. Embedding metadata would require a non-standard output format and complicate downstream consumption. Verbose mode (`--verbose`) provides file-level provenance during the merge run.
 
@@ -142,13 +142,13 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 - **INI**: Legacy support for existing applications.
 - **XML**: Not a configuration format in modern practice; adds significant complexity.
 
-**Trade-off**: Some legacy systems use XML for configuration. Users with XML configuration files must convert them or pre-process them with another tool before using CascConf.
+**Trade-off**: Some legacy systems use XML for configuration. Users with XML configuration files must convert them or pre-process them with another tool before using CasConf.
 
 ---
 
 ### 12. Cross-Format Merging
 
-**Decision**: CascConf can merge configuration files in different formats within the same cascade (e.g., a JSON file and a YAML override file).
+**Decision**: CasConf can merge configuration files in different formats within the same cascade (e.g., a JSON file and a YAML override file).
 
 **Rationale**: The internal representation is always a Python dict. Format is only relevant at parse time (input) and serialize time (output). Cross-format merging is a natural consequence of this design and a useful feature for real-world deployments.
 
@@ -158,7 +158,7 @@ Both interfaces use the same underlying engines, ensuring consistent behavior.
 
 ## Performance Design
 
-CascConf is a batch tool, not a service. Performance targets are:
+CasConf is a batch tool, not a service. Performance targets are:
 
 - **Startup time**: < 500 ms for typical usage (< 10 files, no remote sources).
 - **Merge time**: < 100 ms for configurations up to 1 MB total.
@@ -172,8 +172,8 @@ These targets are met by the simple in-memory merge algorithm. No caching or ind
 
 - **Path traversal**: Directory paths are resolved to absolute paths before use. Paths outside the filesystem root are rejected.
 - **Symlink following**: Symlinks in configuration directories are followed by default. This is the standard behavior and allows flexible directory layouts.
-- **No code execution**: CascConf never executes code from configuration files. YAML's `yaml.safe_load` is used (not `yaml.load`).
-- **No network access**: CascConf does not make network requests in v1. Remote sources are a future feature.
+- **No code execution**: CasConf never executes code from configuration files. YAML's `yaml.safe_load` is used (not `yaml.load`).
+- **No network access**: CasConf does not make network requests in v1. Remote sources are a future feature.
 
 ---
 
@@ -183,7 +183,7 @@ These targets are met by the simple in-memory merge algorithm. No caching or ind
 - **mergeconf**: Accurate but loses the cascade metaphor.
 - **confcascade**: Awkward word order.
 - **stackconf**: Implies a stack data structure, less intuitive.
-- **CascConf**: Concise, memorable, and clearly describes the cascading configuration concept.
+- **CasConf**: Concise, memorable, and clearly describes the cascading configuration concept.
 
 ---
 

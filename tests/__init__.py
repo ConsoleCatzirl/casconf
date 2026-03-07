@@ -1,1 +1,1 @@
-"""Test suite for CascConf."""
+"""Test suite for CasConf."""

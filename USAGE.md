@@ -1,27 +1,27 @@
-# CascConf Quick Start Guide
+# CasConf Quick Start Guide
 
-This guide walks you through installing CascConf and merging your first configuration files.
+This guide walks you through installing CasConf and merging your first configuration files.
 
 ## Installation
 
 ### From PyPI (when published)
 
 ```bash
-pip install cascconf
+pip install casconf
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/ConsoleCatzirlI/cascconf.git
-cd cascconf
+git clone https://github.com/ConsoleCatzirlI/casconf.git
+cd casconf
 pip install -e .
 ```
 
 ### Verify Installation
 
 ```bash
-cascconf --version
+casconf --version
 ```
 
 ---
@@ -87,7 +87,7 @@ mkdir -p /etc/myapp ~/.config/myapp ./config
 
 ### Step 2: Create a Discovery Configuration
 
-Create `cascconf.yaml` in your project directory:
+Create `casconf.yaml` in your project directory:
 
 ```yaml
 directories:
@@ -101,11 +101,11 @@ patterns:
 merge_strategy: deep
 ```
 
-### Step 3: Run CascConf
+### Step 3: Run CasConf
 
 ```bash
 # Output merged config to stdout
-cascconf --discovery-config ./cascconf.yaml
+casconf --discovery-config ./casconf.yaml
 ```
 
 **Expected output:**
@@ -133,7 +133,7 @@ Each directory's configuration cascades over the previous one, with later entrie
 ### Step 4: Write Output to a File
 
 ```bash
-cascconf --discovery-config ./cascconf.yaml --output ./merged.json
+casconf --discovery-config ./casconf.yaml --output ./merged.json
 ```
 
 ---
@@ -145,7 +145,7 @@ cascconf --discovery-config ./cascconf.yaml --output ./merged.json
 Manage configuration for different deployment environments:
 
 ```yaml
-# cascconf.yaml
+# casconf.yaml
 directories:
   - /etc/myapp
   - ~/.config/myapp
@@ -155,7 +155,7 @@ directories:
 
 ```bash
 # Switch environments by adjusting the discovery config
-cascconf --discovery-config ./cascconf.production.yaml --output ./config.json
+casconf --discovery-config ./casconf.production.yaml --output ./config.json
 ```
 
 ### User Overrides
@@ -163,7 +163,7 @@ cascconf --discovery-config ./cascconf.production.yaml --output ./config.json
 Allow users to customize application behavior without modifying system files:
 
 ```yaml
-# cascconf.yaml
+# casconf.yaml
 directories:
   - /etc/myapp          # system defaults (lowest priority)
   - /usr/local/etc/myapp
@@ -179,7 +179,7 @@ patterns:
 Merge configuration from multiple plugin directories:
 
 ```yaml
-# cascconf.yaml
+# casconf.yaml
 directories:
   - ./config/base
   - ./plugins/auth/config
@@ -193,23 +193,23 @@ patterns:
 
 ### Unix Pipeline Integration
 
-CascConf outputs to stdout by default, making it a natural fit for Unix pipelines:
+CasConf outputs to stdout by default, making it a natural fit for Unix pipelines:
 
 ```bash
 # Extract a specific key with jq
-cascconf | jq '.database.host'
+casconf | jq '.database.host'
 
 # Filter YAML output with grep
-cascconf --format yaml | grep "host:"
+casconf --format yaml | grep "host:"
 
 # Pass config to another tool
-cascconf | my-app --config-stdin
+casconf | my-app --config-stdin
 
 # Transform and save
-cascconf | python -c "import sys,json; c=json.load(sys.stdin); c['extra']='value'; print(json.dumps(c))" > final.json
+casconf | python -c "import sys,json; c=json.load(sys.stdin); c['extra']='value'; print(json.dumps(c))" > final.json
 
 # Use in shell scripts
-DB_HOST=$(cascconf | jq -r '.database.host')
+DB_HOST=$(casconf | jq -r '.database.host')
 echo "Connecting to $DB_HOST"
 ```
 
@@ -220,10 +220,10 @@ echo "Connecting to $DB_HOST"
 ### Basic Merge
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
 # Returns merged configuration as a Python dict
-config = merge_configs(discovery_config='./cascconf.yaml')
+config = merge_configs(discovery_config='./casconf.yaml')
 
 print(config['database']['host'])  # localhost
 print(config['logging']['level'])  # DEBUG
@@ -232,11 +232,11 @@ print(config['logging']['level'])  # DEBUG
 ### Merge and Write to File
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
 # Merge and write to file in a single call
 merge_configs(
-    discovery_config='./cascconf.yaml',
+    discovery_config='./casconf.yaml',
     output='./merged.json',
     output_format='json'
 )
@@ -245,7 +245,7 @@ merge_configs(
 ### Programmatic Configuration
 
 ```python
-from cascconf import merge_configs, DiscoveryConfig
+from casconf import merge_configs, DiscoveryConfig
 
 # Configure discovery programmatically without a file
 discovery = DiscoveryConfig(
@@ -264,14 +264,14 @@ config = merge_configs(discovery_config=discovery)
 ### Validation
 
 ```python
-from cascconf import merge_configs, validate_config
-from cascconf.exceptions import CascConfValidationError
+from casconf import merge_configs, validate_config
+from casconf.exceptions import CasConfValidationError
 
 try:
-    config = merge_configs(discovery_config='./cascconf.yaml')
+    config = merge_configs(discovery_config='./casconf.yaml')
     validate_config(config, schema='./schema.json')
     print("Configuration is valid")
-except CascConfValidationError as e:
+except CasConfValidationError as e:
     print(f"Invalid configuration: {e}")
 ```
 
@@ -279,20 +279,20 @@ except CascConfValidationError as e:
 
 ```python
 import logging
-from cascconf import merge_configs
-from cascconf.exceptions import CascConfError
+from casconf import merge_configs
+from casconf.exceptions import CasConfError
 
 logger = logging.getLogger(__name__)
 
 def load_app_config():
     try:
         config = merge_configs(
-            discovery_config='./cascconf.yaml',
+            discovery_config='./casconf.yaml',
             log_level=logging.DEBUG,
         )
         logger.info("Configuration loaded successfully")
         return config
-    except CascConfError as e:
+    except CasConfError as e:
         logger.error(f"Failed to load configuration: {e}")
         raise SystemExit(1)
 ```
@@ -306,7 +306,7 @@ def load_app_config():
 See which files are being discovered and merged:
 
 ```bash
-cascconf --verbose --discovery-config ./cascconf.yaml
+casconf --verbose --discovery-config ./casconf.yaml
 ```
 
 Output:
@@ -325,7 +325,7 @@ Output:
 Discover and merge files matching multiple patterns:
 
 ```yaml
-# cascconf.yaml
+# casconf.yaml
 directories:
   - /etc/myapp
   - ~/.config/myapp
@@ -341,17 +341,17 @@ Files are discovered in pattern order within each directory, then merged in dire
 
 ### Format Conversion
 
-Convert configuration between formats using CascConf:
+Convert configuration between formats using CasConf:
 
 ```bash
 # Read JSON configs, output as YAML
-cascconf --format yaml --output merged.yaml
+casconf --format yaml --output merged.yaml
 
 # Read YAML configs, output as TOML
-cascconf --format toml --output merged.toml
+casconf --format toml --output merged.toml
 
 # Read mixed formats, output as JSON (default)
-cascconf --output merged.json
+casconf --output merged.json
 ```
 
 ---
@@ -366,12 +366,12 @@ Error: No configuration files found matching the discovery configuration.
 
 **Solutions:**
 
-1. Check that the directories in `cascconf.yaml` exist and are readable.
+1. Check that the directories in `casconf.yaml` exist and are readable.
 2. Verify the file patterns match your actual file names.
 3. Run with `--verbose` to see what directories are being scanned.
 
 ```bash
-cascconf --verbose
+casconf --verbose
 ```
 
 ### Permission Denied
@@ -384,7 +384,7 @@ Error: Permission denied reading /etc/myapp/config.json
 
 1. Check file permissions: `ls -la /etc/myapp/config.json`
 2. Run with appropriate permissions or skip system directories.
-3. Adjust your `cascconf.yaml` to exclude inaccessible directories.
+3. Adjust your `casconf.yaml` to exclude inaccessible directories.
 
 ### Parse Error
 
@@ -403,7 +403,7 @@ Error: Failed to parse /path/to/config.json: Expecting value: line 5 column 3
 If the merged output doesn't look right:
 
 1. Run with `--verbose` to see the merge order.
-2. Check that your `cascconf.yaml` directories are in the intended priority order (last directory wins for scalar values).
+2. Check that your `casconf.yaml` directories are in the intended priority order (last directory wins for scalar values).
 3. Review [DESIGN.md](DESIGN.md) for merge strategy details.
 
 ---
@@ -414,9 +414,9 @@ If the merged output doesn't look right:
 
 2. **Use specific patterns** - Narrow patterns reduce the chance of accidentally merging unintended files.
 
-3. **Keep the discovery config in version control** - Check in `cascconf.yaml` alongside your project to ensure reproducible builds.
+3. **Keep the discovery config in version control** - Check in `casconf.yaml` alongside your project to ensure reproducible builds.
 
-4. **Pipe to jq for inspection** - `cascconf | jq '.'` gives you a formatted, colorized view of the merged configuration.
+4. **Pipe to jq for inspection** - `casconf | jq '.'` gives you a formatted, colorized view of the merged configuration.
 
 5. **Use YAML for human-edited configs** - YAML is more readable than JSON for hand-edited configuration files.
 

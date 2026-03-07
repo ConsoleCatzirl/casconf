@@ -1,15 +1,15 @@
-"""CascConf exception hierarchy.
+"""CasConf exception hierarchy.
 
-All exceptions raised by CascConf are subclasses of :class:`CascConfError`.
-Import from this module or from the top-level ``cascconf`` package.
+All exceptions raised by CasConf are subclasses of :class:`CasConfError`.
+Import from this module or from the top-level ``casconf`` package.
 
 Example::
 
-    from cascconf.exceptions import CascConfParseError
+    from casconf.exceptions import CasConfParseError
 
     try:
         config = merge_configs()
-    except CascConfParseError as exc:
+    except CasConfParseError as exc:
         print(f"Could not parse {exc.path}: {exc}")
 """
 
@@ -18,11 +18,11 @@ from __future__ import annotations
 from pathlib import Path
 
 
-class CascConfError(Exception):
-    """Base exception for all CascConf errors."""
+class CasConfError(Exception):
+    """Base exception for all CasConf errors."""
 
 
-class CascConfConfigError(CascConfError):
+class CasConfConfigError(CasConfError):
     """Raised when the discovery configuration is invalid.
 
     This covers missing required keys, invalid values, and
@@ -30,7 +30,7 @@ class CascConfConfigError(CascConfError):
     """
 
 
-class CascConfParseError(CascConfError):
+class CasConfParseError(CasConfError):
     """Raised when a configuration file cannot be parsed.
 
     Attributes:
@@ -42,11 +42,11 @@ class CascConfParseError(CascConfError):
         self.path: Path = Path(path)
 
 
-class CascConfMergeError(CascConfError):
+class CasConfMergeError(CasConfError):
     """Raised when configurations cannot be merged."""
 
 
-class CascConfWriteError(CascConfError):
+class CasConfWriteError(CasConfError):
     """Raised when the output cannot be written.
 
     This covers permission-denied errors, invalid output paths,

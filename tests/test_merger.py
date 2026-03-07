@@ -1,4 +1,4 @@
-"""Tests for cascconf.merger."""
+"""Tests for casconf.merger."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from cascconf.merger import deep_merge, merge, shallow_merge
+from casconf.merger import deep_merge, merge, shallow_merge
 
 
 class TestDeepMerge:

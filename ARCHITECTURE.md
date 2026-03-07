@@ -1,13 +1,13 @@
-# CascConf Architecture
+# CasConf Architecture
 
-This document describes the system design and component overview for CascConf.
+This document describes the system design and component overview for CasConf.
 
 ## Design Principles
 
-CascConf is built on the following principles:
+CasConf is built on the following principles:
 
 ### Unix Philosophy
-Do one thing and do it well. CascConf merges configuration files. It does not deploy applications, manage secrets, or validate business logic. It outputs to stdout by default, enabling composition with other tools.
+Do one thing and do it well. CasConf merges configuration files. It does not deploy applications, manage secrets, or validate business logic. It outputs to stdout by default, enabling composition with other tools.
 
 ### Separation of Concerns
 Each component has a single, well-defined responsibility:
@@ -20,7 +20,7 @@ Each component has a single, well-defined responsibility:
 New file formats, merge strategies, and output formats can be added without modifying existing components.
 
 ### Minimal Dependencies
-CascConf avoids unnecessary third-party dependencies. The standard library covers most needs; optional dependencies are used only for non-standard formats (e.g., TOML, YAML).
+CasConf avoids unnecessary third-party dependencies. The standard library covers most needs; optional dependencies are used only for non-standard formats (e.g., TOML, YAML).
 
 ### PEP 8 Compliance
 All Python code follows PEP 8 style guidelines. Code is readable, consistently formatted, and easy to maintain.
@@ -31,7 +31,7 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CascConf                                │
+│                         CasConf                                │
 │                                                                 │
 │  Input: Discovery Configuration (file or programmatic object)  │
 │                                                                 │
@@ -95,7 +95,7 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 **Behavior**:
 - Detects file format from the file extension (`.json`, `.yaml`, `.yml`, `.toml`, `.ini`, `.cfg`).
 - Falls back to attempting each known parser if extension detection fails.
-- Raises `CascConfParseError` with a descriptive message on parse failure.
+- Raises `CasConfParseError` with a descriptive message on parse failure.
 - Returns an empty dict for empty files (not an error).
 
 **Supported Formats**:
@@ -166,9 +166,9 @@ All Python code follows PEP 8 style guidelines. Code is readable, consistently f
 ```
 User
   │
-  │  cascconf --discovery-config ./cascconf.yaml --output ./merged.json
+  │  casconf --discovery-config ./casconf.yaml --output ./merged.json
   ▼
-CLI Entry Point (cascconf/__main__.py)
+CLI Entry Point (casconf/__main__.py)
   │
   │  Parses CLI arguments
   │  Loads discovery config from file
@@ -191,17 +191,17 @@ Writer Engine → ./merged.json (or stdout)
 ### Library Usage
 
 ```python
-from cascconf import merge_configs
+from casconf import merge_configs
 
-config = merge_configs(discovery_config='./cascconf.yaml')
+config = merge_configs(discovery_config='./casconf.yaml')
 ```
 
 ```
 Python Application
   │
-  │  merge_configs(discovery_config='./cascconf.yaml')
+  │  merge_configs(discovery_config='./casconf.yaml')
   ▼
-Public API (cascconf/__init__.py)
+Public API (casconf/__init__.py)
   │
   │  Accepts file path or DiscoveryConfig object
   ▼
@@ -227,7 +227,7 @@ Python dict (or file on disk)
 ## Module Structure
 
 ```
-cascconf/
+casconf/
 ├── __init__.py          # Public API: merge_configs(), validate_config(), DiscoveryConfig
 ├── __main__.py          # CLI entry point
 ├── cli.py               # CLI argument parsing and orchestration
@@ -264,12 +264,12 @@ Configuration files are processed in a chain: each file's parsed dict is passed 
 
 | Exception | Description |
 |-----------|-------------|
-| `CascConfError` | Base exception for all CascConf errors |
-| `CascConfConfigError` | Invalid discovery configuration |
-| `CascConfParseError` | Failed to parse a configuration file |
-| `CascConfMergeError` | Irreconcilable merge conflict |
-| `CascConfWriteError` | Failed to write output |
-| `CascConfValidationError` | Configuration failed schema validation |
+| `CasConfError` | Base exception for all CasConf errors |
+| `CasConfConfigError` | Invalid discovery configuration |
+| `CasConfParseError` | Failed to parse a configuration file |
+| `CasConfMergeError` | Irreconcilable merge conflict |
+| `CasConfWriteError` | Failed to write output |
+| `CasConfValidationError` | Configuration failed schema validation |
 
 ### Strategy
 - **Fail fast on configuration errors**: A malformed discovery config raises immediately.

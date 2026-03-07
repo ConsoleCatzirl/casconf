@@ -1,6 +1,6 @@
-# Contributing to CascConf
+# Contributing to CasConf
 
-Thank you for your interest in contributing to CascConf! Contributions of all kinds are welcome, including bug reports, feature suggestions, documentation improvements, and code changes.
+Thank you for your interest in contributing to CasConf! Contributions of all kinds are welcome, including bug reports, feature suggestions, documentation improvements, and code changes.
 
 ## Code of Conduct
 
@@ -14,7 +14,7 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 1. **Search existing issues** to avoid duplicates.
 2. **Open a new issue** with the following information:
-   - CascConf version (`cascconf --version`)
+   - CasConf version (`casconf --version`)
    - Python version (`python --version`)
    - Operating system
    - Steps to reproduce
@@ -69,8 +69,8 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 ```bash
 # Clone your fork
-git clone https://github.com/<your-username>/cascconf.git
-cd cascconf
+git clone https://github.com/<your-username>/casconf.git
+cd casconf
 
 # Install all dependencies (including dev) into a managed virtualenv
 pipenv install --dev
@@ -82,10 +82,10 @@ pipenv shell
 ### Project Structure
 
 ```
-cascconf/
-├── cascconf/            # Source package
+casconf/
+├── casconf/            # Source package
 │   ├── __init__.py      # Public API re-exports
-│   ├── __main__.py      # CLI entry point (python -m cascconf)
+│   ├── __main__.py      # CLI entry point (python -m casconf)
 │   ├── api.py           # Public API implementation
 │   ├── cli.py           # CLI argument parsing
 │   ├── discovery.py     # Discovery Engine
@@ -139,7 +139,7 @@ pipenv run test -k "merge"
 
 ## Code Style
 
-CascConf follows **PEP 8 strictly**. The project uses `black` for formatting, `isort` for import ordering, and `flake8` for linting.
+CasConf follows **PEP 8 strictly**. The project uses `black` for formatting, `isort` for import ordering, and `flake8` for linting.
 
 ### Linting and Formatting
 
@@ -206,7 +206,7 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 
 ```python
 class DiscoveryConfig:
-    """Configuration for the CascConf discovery engine.
+    """Configuration for the CasConf discovery engine.
 
     Attributes:
         directories: Ordered list of directories to scan.
@@ -239,7 +239,7 @@ class DiscoveryConfig:
 
 ```python
 import pytest
-from cascconf.merger import deep_merge
+from casconf.merger import deep_merge
 
 
 def test_deep_merge_nested_dicts():
@@ -290,7 +290,7 @@ def test_deep_merge_appends_lists():
 
 ## Commit Message Format
 
-CascConf uses [Conventional Commits](https://www.conventionalcommits.org/):
+CasConf uses [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <short description>

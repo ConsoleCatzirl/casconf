@@ -1,4 +1,4 @@
-"""Tests for cascconf.discovery."""
+"""Tests for casconf.discovery."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from cascconf.discovery import DiscoveryConfig, discover
-from cascconf.exceptions import CascConfConfigError
+from casconf.discovery import DiscoveryConfig, discover
+from casconf.exceptions import CasConfConfigError
 
 # Path to the test fixtures directory
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -48,7 +48,7 @@ class TestDiscoveryConfigConstruction:
         assert dc.merge_strategy == "shallow"
 
     def test_invalid_merge_strategy_raises(self):
-        with pytest.raises(CascConfConfigError, match="merge_strategy"):
+        with pytest.raises(CasConfConfigError, match="merge_strategy"):
             DiscoveryConfig(
                 directories=["/tmp"],
                 patterns=["*.json"],
@@ -56,11 +56,11 @@ class TestDiscoveryConfigConstruction:
             )
 
     def test_empty_directories_raises(self):
-        with pytest.raises(CascConfConfigError, match="directories"):
+        with pytest.raises(CasConfConfigError, match="directories"):
             DiscoveryConfig(directories=[], patterns=["*.json"])
 
     def test_empty_patterns_raises(self):
-        with pytest.raises(CascConfConfigError, match="patterns"):
+        with pytest.raises(CasConfConfigError, match="patterns"):
             DiscoveryConfig(directories=["/tmp"], patterns=[])
 
 
@@ -78,11 +78,11 @@ class TestDiscoveryConfigFromDict:
         assert dc.merge_strategy == "shallow"
 
     def test_missing_directories_raises(self):
-        with pytest.raises(CascConfConfigError, match="directories"):
+        with pytest.raises(CasConfConfigError, match="directories"):
             DiscoveryConfig.from_dict({"patterns": ["*.json"]})
 
     def test_missing_patterns_raises(self):
-        with pytest.raises(CascConfConfigError, match="patterns"):
+        with pytest.raises(CasConfConfigError, match="patterns"):
             DiscoveryConfig.from_dict({"directories": ["/tmp"]})
 
     def test_merge_strategy_defaults_to_deep(self):
