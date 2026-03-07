@@ -80,6 +80,23 @@ merge_configs(
 )
 ```
 
+```python
+from casconf import merge_configs, DiscoveryConfig
+
+# Build a DiscoveryConfig programmatically (no file required)
+discovery = DiscoveryConfig(
+    directories=[
+        '/etc/myapp/defaults',
+        '/etc/myapp/$ENVIRONMENT',   # expanded at runtime, e.g. production
+        '~/.config/myapp',
+    ],
+    patterns=['config.json', 'config.yaml'],
+    merge_strategy='deep',
+)
+
+config = merge_configs(discovery_config=discovery)
+```
+
 ## Discovery Configuration
 
 CasConf uses a discovery configuration file to determine where to search for configuration files:

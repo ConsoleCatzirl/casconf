@@ -141,20 +141,26 @@ casconf --discovery-config ./casconf.yaml --output ./merged.json
 
 ### Environment-Based Configuration
 
-Manage configuration for different deployment environments:
+Manage configuration for different deployment environments using the `$ENVIRONMENT` variable in directory paths:
 
 ```yaml
 # casconf.yaml
 directories:
-  - /etc/myapp
-  - ~/.config/myapp
-  - ./config/base
-  - ./config/production  # or development, staging
+  - /etc/myapp/defaults      # shared base configuration
+  - /etc/myapp/$ENVIRONMENT  # environment-specific overrides, e.g. production, staging
+  - ~/.config/myapp          # user overrides (highest priority)
+
+patterns:
+  - "config.json"
+  - "config.yaml"
+
+merge_strategy: deep
 ```
 
 ```bash
-# Switch environments by adjusting the discovery config
-casconf --discovery-config ./casconf.production.yaml --output ./config.json
+# Set the environment and run
+export ENVIRONMENT=production
+casconf --output ./config.json
 ```
 
 ### User Overrides
