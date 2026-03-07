@@ -53,7 +53,7 @@ class TestMergeConfigsPublicApi:
         assert out.exists()
 
     def test_uses_env_var_when_discovery_config_is_none(self, tmp_path, monkeypatch):
-        """merge_configs(None) uses CASCCONF_DISCOVERY env var."""
+        """merge_configs(None) uses CASCONF_DISCOVERY env var."""
         import yaml
 
         dc = tmp_path / "env.yaml"
@@ -66,7 +66,7 @@ class TestMergeConfigsPublicApi:
             ),
             encoding="utf-8",
         )
-        monkeypatch.setenv("CASCCONF_DISCOVERY", str(dc))
+        monkeypatch.setenv("CASCONF_DISCOVERY", str(dc))
         result = merge_configs(discovery_config=None)
         assert isinstance(result, dict)
 

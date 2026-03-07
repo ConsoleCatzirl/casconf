@@ -343,11 +343,11 @@ All command-line options can be set via environment variables. This is useful in
 
 | Environment Variable | Corresponding Flag | Description |
 |---|---|---|
-| `CASCCONF_DISCOVERY` | `--discovery-config` | Path to discovery configuration file |
-| `CASCCONF_OUTPUT` | `--output` | Output file path |
-| `CASCCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
-| `CASCCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
-| `CASCCONF_LOG_LEVEL` | _(no flag)_ | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `CASCONF_DISCOVERY` | `--discovery-config` | Path to discovery configuration file |
+| `CASCONF_OUTPUT` | `--output` | Output file path |
+| `CASCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
+| `CASCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
+| `CASCONF_LOG_LEVEL` | _(no flag)_ | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 
 Command-line flags always take precedence over environment variables.
 
@@ -355,20 +355,20 @@ Command-line flags always take precedence over environment variables.
 
 ```bash
 # Set output format and destination via environment
-export CASCCONF_FORMAT=yaml
-export CASCCONF_OUTPUT=/var/cache/myapp/config.yaml
+export CASCONF_FORMAT=yaml
+export CASCONF_OUTPUT=/var/cache/myapp/config.yaml
 casconf
 
 # Enable verbose logging via environment
-export CASCCONF_VERBOSE=1
+export CASCONF_VERBOSE=1
 casconf
 
 # Use a specific discovery config via environment
-export CASCCONF_DISCOVERY=/etc/myapp/casconf.yaml
+export CASCONF_DISCOVERY=/etc/myapp/casconf.yaml
 casconf
 
 # Override env with a flag (flag wins)
-CASCCONF_FORMAT=yaml casconf --format toml   # output is toml
+CASCONF_FORMAT=yaml casconf --format toml   # output is toml
 ```
 
 ### FQDN-Based Host Configuration

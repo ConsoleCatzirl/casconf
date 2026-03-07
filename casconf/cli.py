@@ -24,10 +24,10 @@ from casconf.api import (
 from casconf.exceptions import CasConfError
 from casconf.writer import write
 
-_ENV_LOG_LEVEL = "CASCCONF_LOG_LEVEL"
-_ENV_OUTPUT = "CASCCONF_OUTPUT"
-_ENV_FORMAT = "CASCCONF_FORMAT"
-_ENV_VERBOSE = "CASCCONF_VERBOSE"
+_ENV_LOG_LEVEL = "CASCONF_LOG_LEVEL"
+_ENV_OUTPUT = "CASCONF_OUTPUT"
+_ENV_FORMAT = "CASCONF_FORMAT"
+_ENV_VERBOSE = "CASCONF_VERBOSE"
 _DEFAULT_FORMAT = "json"
 
 
@@ -111,7 +111,7 @@ def _configure_logging(verbose: bool) -> None:
 
     Args:
         verbose: If ``True``, set log level to DEBUG; otherwise use
-            the value of ``$CASCCONF_LOG_LEVEL`` (default WARNING).
+            the value of ``$CASCONF_LOG_LEVEL`` (default WARNING).
     """
     if verbose:
         level = logging.DEBUG

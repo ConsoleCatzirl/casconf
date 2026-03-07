@@ -18,7 +18,7 @@ from casconf.merger import merge
 from casconf.parser import parse
 from casconf.writer import write
 
-_ENV_DISCOVERY = "CASCCONF_DISCOVERY"
+_ENV_DISCOVERY = "CASCONF_DISCOVERY"
 _DEFAULT_DISCOVERY = "casconf.yaml"
 
 
@@ -33,7 +33,7 @@ def merge_configs(
     Args:
         discovery_config: Path to a discovery configuration file, a
             :class:`DiscoveryConfig` object, or ``None`` to use the
-            value of ``$CASCCONF_DISCOVERY`` (falling back to
+            value of ``$CASCONF_DISCOVERY`` (falling back to
             ``'casconf.yaml'``).
         output: Destination file path.  If ``None`` (default), the
             merged dict is returned and nothing is written to disk.

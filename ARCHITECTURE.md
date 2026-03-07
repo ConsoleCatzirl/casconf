@@ -295,17 +295,17 @@ All CLI options can be set via environment variables. Command-line flags take pr
 
 | Environment Variable | Corresponding Flag | Description |
 |---|---|---|
-| `CASCCONF_DISCOVERY` | `--discovery-config` | Path to the discovery configuration file |
-| `CASCCONF_OUTPUT` | `--output` | Output file path (stdout if unset) |
-| `CASCCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
-| `CASCCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
-| `CASCCONF_LOG_LEVEL` | _(no flag)_ | Log level when `--verbose` is not set (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+| `CASCONF_DISCOVERY` | `--discovery-config` | Path to the discovery configuration file |
+| `CASCONF_OUTPUT` | `--output` | Output file path (stdout if unset) |
+| `CASCONF_FORMAT` | `--format` | Output format: `json`, `yaml`, or `toml` |
+| `CASCONF_VERBOSE` | `--verbose` / `-v` | Enable DEBUG logging (`1`, `true`, or `yes`) |
+| `CASCONF_LOG_LEVEL` | _(no flag)_ | Log level when `--verbose` is not set (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 
 **Example**:
 
 ```bash
-export CASCCONF_FORMAT=yaml
-export CASCCONF_OUTPUT=/var/cache/myapp/config.yaml
+export CASCONF_FORMAT=yaml
+export CASCONF_OUTPUT=/var/cache/myapp/config.yaml
 casconf
 ```
 
