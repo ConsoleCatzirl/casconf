@@ -25,7 +25,7 @@ CascConf discovers configuration files from an ordered list of directories and *
 
 ### Discovery file
 
-CascConf reads a *discovery file* to know which directories to scan. The default discovery file is `~/.config/cascconf/sources.yaml`, but you can specify a different one with the `--sources` flag.
+CascConf reads a *discovery file* (also called a *sources file*) to know which directories to scan and which file patterns to match. The default discovery file is `~/.config/cascconf/sources.yaml`, but you can specify a different one with the `--sources` flag.
 
 ```yaml
 # sources.yaml
@@ -34,13 +34,21 @@ directories:
   - /usr/local/etc/myapp
   - ~/.config/myapp
   - ./config
+
+patterns:
+  - "config.yaml"
+  - "config.json"
+  - "*.conf"
+
+merge_strategy: deep  # or 'shallow'
+list_merge: replace   # or 'append', 'union'
 ```
 
-Directories are scanned in the order listed. Files with the same name found in multiple directories are merged, with later entries winning on conflicts.
+Directories are scanned in the order listed. Files matching the specified patterns found in multiple directories are merged, with later entries winning on conflicts.
 
 ### Configuration file formats
 
-CascConf supports **YAML** (`.yaml`, `.yml`), **JSON** (`.json`), and **TOML** (`.toml`) configuration files. All discovered files with a supported extension are eligible for merging.
+CascConf supports **YAML** (`.yaml`, `.yml`), **JSON** (`.json`), **TOML** (`.toml`), and **INI** (`.ini`, `.cfg`) configuration files out of the box. All discovered files with a supported extension are eligible for merging.
 
 ---
 
@@ -51,6 +59,8 @@ CascConf supports **YAML** (`.yaml`, `.yml`), **JSON** (`.json`), and **TOML** (
 ```bash
 cascconf
 ```
+
+By default, output goes to stdout. This makes CascConf composable with other Unix tools.
 
 ### Specify a custom discovery (sources) file
 
@@ -70,7 +80,7 @@ cascconf --output /path/to/result.yaml
 cascconf --file app.yaml
 ```
 
-By default, CascConf merges every supported configuration file it discovers. Use `--file` to restrict merging to files with a specific name.
+By default, CascConf merges files matching the patterns in your sources file. Use `--file` to restrict merging to files with a specific name.
 
 ### Control output format
 
@@ -78,7 +88,22 @@ By default, CascConf merges every supported configuration file it discovers. Use
 cascconf --format json
 ```
 
-Supported formats: `yaml` (default), `json`, `toml`.
+Supported formats: `yaml` (default), `json`, `toml`, `ini`.
+
+### Specify merge strategy
+
+```bash
+cascconf --merge-strategy deep --list-merge append
+```
+
+Merge strategies:
+- `deep` (default): Recursively merge nested dictionaries
+- `shallow`: Only merge top-level keys
+
+List merge strategies:
+- `replace` (default): Later lists replace earlier ones
+- `append`: Concatenate lists
+- `union`: Merge lists without duplicates
 
 ### Verbose/debug output
 
@@ -96,6 +121,12 @@ Given the following `sources.yaml`:
 directories:
   - /etc/myapp
   - ~/.config/myapp
+
+patterns:
+  - "settings.yaml"
+
+merge_strategy: deep
+list_merge: replace
 ```
 
 And two files with the same name `settings.yaml`:
@@ -107,6 +138,9 @@ database:
   port: 5432
 logging:
   level: INFO
+features:
+  - logging
+  - caching
 ```
 
 **`~/.config/myapp/settings.yaml`**
@@ -114,9 +148,11 @@ logging:
 database:
   port: 5433
   name: mydb
+features:
+  - monitoring
 ```
 
-Running `cascconf --file settings.yaml` produces:
+Running `cascconf` produces (with `list_merge: replace`):
 
 ```yaml
 database:
@@ -125,6 +161,23 @@ database:
   name: mydb        # added by ~/.config/myapp
 logging:
   level: INFO       # from /etc/myapp
+features:           # replaced by ~/.config/myapp
+  - monitoring
+```
+
+With `list_merge: append`:
+
+```yaml
+database:
+  host: localhost
+  port: 5433
+  name: mydb
+logging:
+  level: INFO
+features:
+  - logging
+  - caching
+  - monitoring
 ```
 
 ---
@@ -145,6 +198,13 @@ result = cascconf.merge(sources="/path/to/sources.yaml", filename="app.yaml")
 
 # Write output to file (opt-in)
 result = cascconf.merge(output="/path/to/result.yaml")
+
+# Specify merge strategy
+result = cascconf.merge(
+    sources="/path/to/sources.yaml",
+    merge_strategy="deep",
+    list_merge="append"
+)
 
 # Access merged values
 print(result["database"]["host"])

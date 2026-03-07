@@ -31,19 +31,40 @@ CascConf is structured as a thin CLI wrapper around a reusable Python library. T
 
 ### 1. Source Loader
 
-**Responsibility:** Read the *discovery file* (also called the *sources file*) and return an ordered list of directories to scan.
+**Responsibility:** Read the *discovery file* (also called the *sources file*) and return configuration for file discovery.
 
-- Reads a YAML, JSON, or TOML file whose `directories` key contains an ordered list of directory paths.
+- Reads a YAML, JSON, or TOML file containing:
+  - `directories`: An ordered list of directory paths to scan
+  - `patterns`: Glob patterns for matching configuration files (e.g., `"*.yaml"`, `"config.json"`)
+  - `merge_strategy`: How to merge nested structures (`deep` or `shallow`)
+  - `list_merge`: How to merge list values (`replace`, `append`, or `union`)
 - Expands `~` home-directory references and environment variables in paths.
 - Validates that all listed paths are strings; non-existent directories are silently skipped (with an optional warning in verbose mode).
 
 **Default discovery file location:** `~/.config/cascconf/sources.yaml`
 
+**Example sources file:**
+```yaml
+directories:
+  - /etc/myapp
+  - ~/.config/myapp
+  - ./config
+
+patterns:
+  - "config.yaml"
+  - "config.json"
+  - "*.conf.yaml"
+
+merge_strategy: deep
+list_merge: replace
+```
+
 ### 2. File Discoverer
 
 **Responsibility:** Walk each source directory and collect configuration file paths, in directory-list order.
 
-- For each directory in the ordered list, scans the top level (non-recursive by default) for files with supported extensions: `.yaml`, `.yml`, `.json`, `.toml`.
+- For each directory in the ordered list, scans for files matching the configured patterns.
+- If no patterns are specified, defaults to all supported extensions: `.yaml`, `.yml`, `.json`, `.toml`, `.ini`, `.cfg`.
 - When a `--file` / `filename` filter is provided, only files whose basename matches the filter are collected.
 - Returns an ordered list of `(directory, filepath)` tuples, preserving the priority order.
 
@@ -55,16 +76,23 @@ CascConf is structured as a thin CLI wrapper around a reusable Python library. T
   - `.yaml` / `.yml` → [PyYAML](https://pyyaml.org/) (`yaml.safe_load`)
   - `.json` → standard library `json`
   - `.toml` → [tomllib](https://docs.python.org/3/library/tomllib.html) (stdlib ≥ 3.11) or [tomli](https://github.com/hukkin/tomli) (backport)
+  - `.ini` / `.cfg` → standard library `configparser`
 - Parse errors surface as a `CascConfParseError` with the offending file path included in the message.
 
 ### 4. Deep Merger
 
-**Responsibility:** Combine an ordered sequence of dicts into a single dict using deep-merge semantics.
+**Responsibility:** Combine an ordered sequence of dicts into a single dict using the configured merge strategy.
 
-Deep-merge rules:
-- If a key exists in both the *base* and the *overlay* and **both values are dicts**, recurse.
-- Otherwise the **overlay value wins** (later source takes precedence).
-- Lists are replaced, not concatenated (consistent, predictable behavior).
+**Merge strategies:**
+
+- **`deep`** (default): Recursively merge nested dictionaries. If a key exists in both the *base* and the *overlay* and both values are dicts, recurse.
+- **`shallow`**: Only merge top-level keys. Nested structures are replaced entirely.
+
+**List merge strategies:**
+
+- **`replace`** (default): Lists in the overlay replace lists in the base entirely.
+- **`append`**: Lists are concatenated (base + overlay).
+- **`union`**: Lists are merged without duplicates, preserving order.
 
 The merger is a pure function with no side effects, making it easy to test in isolation and to use in library mode.
 
@@ -72,8 +100,8 @@ The merger is a pure function with no side effects, making it easy to test in is
 
 **Responsibility:** Convert the merged `dict` back into a text representation.
 
-- Supported output formats: `yaml` (default), `json`, `toml`.
-- In CLI mode, writes to the path specified by `--output`, or stdout if no path is given.
+- Supported output formats: `yaml` (default), `json`, `toml`, `ini`.
+- In CLI mode, writes to stdout by default, or to the path specified by `--output`.
 - In library mode, writes to file only when an `output` path is explicitly provided by the caller; otherwise returns the `dict` directly.
 
 ---
@@ -84,7 +112,7 @@ The merger is a pure function with no side effects, making it easy to test in is
 sources.yaml
      │
      ▼
-[Source Loader] ──► ordered list of directories
+[Source Loader] ──► directories, patterns, merge config
                             │
                             ▼
               [File Discoverer] ──► ordered list of file paths
@@ -118,11 +146,20 @@ When CascConf is imported as a library, it never writes to disk unless the calle
 
 ### Format agnosticism
 
-Users may store different layers of their configuration in different formats (e.g., a base layer in TOML, an override layer in YAML). CascConf normalises every file into a Python `dict` before merging, so formats can be mixed freely within a single merge operation.
+Users may store different layers of their configuration in different formats (e.g., a base layer in TOML, an override layer in YAML, legacy settings in INI). CascConf normalises every file into a Python `dict` before merging, so formats can be mixed freely within a single merge operation.
 
 ### Ordered precedence
 
 Directory order is explicit and user-controlled via the sources file. There is no implicit search-path magic; what you configure is exactly what runs. This makes behavior reproducible and auditable.
+
+### Configurable merge behavior
+
+Different use cases require different merge behaviors:
+- Some users want lists to be replaced (e.g., feature flags)
+- Others want lists to be appended (e.g., plugin lists)
+- Some want shallow merging for certain config sections
+
+CascConf makes these behaviors explicit and configurable.
 
 ---
 

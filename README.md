@@ -10,9 +10,11 @@ CascConf follows the [Unix Philosophy](https://en.wikipedia.org/wiki/Unix_philos
 
 - **Deep merge** — nested keys from later sources override or extend earlier sources rather than replacing entire objects.
 - **Ordered discovery** — directories are scanned in a user-defined order; files discovered later take precedence.
-- **Pluggable formats** — supports YAML, JSON, and TOML configuration files out of the box.
+- **Pluggable formats** — supports YAML, JSON, TOML, and INI configuration files out of the box.
+- **Configurable file patterns** — use glob patterns to select which files to merge.
+- **Configurable merge strategies** — choose how lists and nested structures are combined.
 - **Dual-mode usage** — run as a CLI tool *or* import as a Python library.
-- **Unix-friendly** — reads from stdin, writes to stdout, integrates seamlessly with pipes and shell scripts.
+- **Unix-friendly** — writes to stdout by default, integrates seamlessly with pipes and shell scripts.
 
 ## Quick Start
 
