@@ -28,14 +28,4 @@ CHANGES
   * ``py.typed`` marker for PEP 561 inline type information
 
 * Added 99 unit tests across 7 test modules; coverage threshold set to 90%
-* Added test fixtures for base, override, and extra merge scenarios
 * Made ``pyyaml`` and ``tomli-w``/``tomli`` optional package extras (``casconf[yaml]`` and ``casconf[toml]``)
-* Removed ``validate_config`` to simplify the public API
-* Simplified the parser: removed internal ``run()`` helper
-* Updated API.md to reflect the simplified interfaces
-* Fixed dev workflow: aligned Pipfile scripts and CONTRIBUTING.md to use ``pipenv run`` consistently
-* Removed ``python_version`` from Pipfile ``[requires]`` (redundant with ``requires-python`` in ``pyproject.toml``)
-* Increased maximum line length to 127 characters (black, isort, flake8)
-* Applied ``black`` and ``isort`` formatting at the new line length
-* Fixed all flake8 linting issues (E721 type comparison, F401/F811 unused imports)
-* Fixed all mypy type-checking issues (missing stubs, stale ``type: ignore`` comments, ``no-any-return``, ``arg-type``)

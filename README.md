@@ -2,7 +2,7 @@
 
 **Cascading Configuration Manager**
 
-CasConf is a flexible configuration management tool that deep-merges configuration files across multiple directories following a cascading pattern. It embodies the Unix Philosophy: do one thing well.
+CasConf is a flexible configuration management tool that deep-merges configuration files across multiple directories following a cascading pattern.
 
 ## Overview
 
@@ -12,10 +12,7 @@ CasConf scans a configurable list of directories for matching configuration file
 
 - **Deep Merging**: Recursively merges nested configuration structures
 - **Format Agnostic**: Supports JSON, YAML, TOML, and INI formats
-- **Dual Interface**: Use as a CLI tool or Python library
 - **Configurable Discovery**: Define your own directory scan order
-- **PEP 8 Compliant**: Clean, maintainable Python code
-- **Unix Philosophy**: Does one thing well - merges configurations
 
 ## Use Cases
 
@@ -50,10 +47,6 @@ merge_configs(discovery_config='./casconf.yaml', output='./merged.json')
 ```
 
 See [USAGE.md](USAGE.md) for detailed examples.
-
-## Project Status
-
-🚧 **In Development** - This project is currently in the specification phase.
 
 ## Documentation
 
@@ -92,7 +85,7 @@ casconf --format yaml
 # Use custom discovery configuration
 casconf --discovery-config ./custom-discovery.yaml --output ./merged.json
 
-# Pipe to other tools (Unix Philosophy)
+# Pipe to other tools
 casconf | jq '.database'
 casconf --format yaml | grep "host:"
 ```
