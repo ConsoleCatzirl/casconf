@@ -1,0 +1,8 @@
+database:
+  port: 5433
+logging:
+  level: DEBUG
+features:
+  cache: true
+plugins:
+  - cache
