@@ -327,8 +327,7 @@ test(merger): add regression test for type conflict warning
 
 Releases are managed by the project maintainers. The process is:
 
-1. Update `CHANGELOG.md` with changes since the last release.
-2. Bump the version in `pyproject.toml`.
-3. Tag the commit: `git tag v<version>`.
-4. Push the tag: `git push origin v<version>`.
-5. The CI pipeline publishes to PyPI automatically.
+1. Ensure AUTHORS and ChangeLog are up to date: `python -m build`.
+2. Create an annotated tag: `git tag -a -m ${version} ${version}`.
+3. Push the tag: `git push origin ${version}`.
+4. The CI pipeline publishes to PyPI automatically.
