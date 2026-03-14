@@ -1,31 +1,44 @@
 CHANGES
 =======
 
-0.1.0 (Unreleased)
-------------------
+* test(ci): only run test workflow on PRs
 
-* Initial project specification and documentation
-* Added README.md with project overview
-* Added QUICKSTART.md with getting started guide
-* Added ARCHITECTURE.md with system design
-* Added DESIGN.md with design decisions and rationale
-* Added CONTRIBUTING.md with contribution guidelines
-* Added API.md with library API reference
-* Added dual MIT/GPL-3.0 license
-* Set up pbr for build and version management
-* Set up Pipenv for dependency management
-* Implemented the complete ``casconf`` Python package:
+v0.1.2
+------
 
-  * ``casconf.api`` — ``merge_configs()`` public entry point
-  * ``casconf.cli`` — ``argparse``-based CLI (``casconf`` command)
-  * ``casconf.discovery`` — ``DiscoveryConfig`` and directory scanner
-  * ``casconf.merger`` — deep and shallow merge strategies
-  * ``casconf.parser`` — extension-based format detection with fallback chain
-  * ``casconf.registry`` — pluggable parser/writer registry
-  * ``casconf.writer`` — serialise to JSON, YAML, or TOML
-  * ``casconf.exceptions`` — typed exception hierarchy
-  * ``casconf.__main__`` — ``python -m casconf`` support
-  * ``py.typed`` marker for PEP 561 inline type information
+* fix(ci): allow network access to upload.pypi.org
 
-* Added 99 unit tests across 7 test modules; coverage threshold set to 90%
-* Made ``pyyaml`` and ``tomli-w``/``tomli`` optional package extras (``casconf[yaml]`` and ``casconf[toml]``)
+v0.1.1
+------
+
+* fix(ci): update allow list with current baseline
+* fix(ci): allow network access to sigstore.dev
+* fix(ci): allow network access to pkg-containers.githubusercontent.com
+* style(ci): rename .yml -> .yaml
+* fix(ci): audit network access
+* fix(ci): allow ghcr.io network access
+* style(lint): address linter issue
+* chore(ci): add test and release workflows
+* docs: add DiscoveryConfig example to README and update env-var patterns in USAGE
+* Initial plan
+* Remove redundant quick-start
+* Add env var expansion example to README quick start and discovery config section
+* Add TestEnvVarExpansionInPaths tests to verify env var expansion in directory paths
+* Rename all CASCCONF\_ → CASCONF\_ and CascConf → CasConf
+* Add list merge strategy, env vars for all CLI params, and update documentation
+* Initial plan
+* A few manual updates
+* Clean up ChangeLog and README
+* Refactor test\_coverage.py into appropriate module test files
+* Rename project, library, and executable from cascconf to casconf
+* Initial plan
+* Update ChangeLog to reflect the full PR scope
+* Remove python\_version from Pipfile, set line-length to 127, run formatters, fix all linting issues
+* Fix dev workflow: align Pipfile and CONTRIBUTING.md to use pipenv scripts consistently
+* Complexity reduction: fix inverted dep, remove run(), simplify parser, update API.md
+* Remove validate\_config; make pyyaml and tomli-w optional extras [yaml]/[toml]
+* Minimal \_\_init\_\_.py, \_get\_version pbr fix, third-level fixture key, quote / in strings
+* Implement Python module matching Documentation
+* Add python project configuration using PBR
+* Create initial project documentation for CascConf
+* Initial commit
