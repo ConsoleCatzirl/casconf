@@ -25,7 +25,6 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: >
-            ghcr.io:443
             github.com:443
             api.github.com:443
             objects.githubusercontent.com:443
@@ -90,12 +89,13 @@ jobs:
       - name: Harden runner
         uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e  # v2.14.2
         with:
-          egress-policy: audit
+          egress-policy: block
           allowed-endpoints: >
             ghcr.io:443
             github.com:443
             api.github.com:443
             objects.githubusercontent.com:443
+            pkg-containers.githubusercontent.com:443
             test.pypi.org:443
             upload.pypi.org:443
 
@@ -136,6 +136,7 @@ jobs:
             github.com:443
             api.github.com:443
             objects.githubusercontent.com:443
+            pkg-containers.githubusercontent.com:443
             pypi.org:443
             upload.pypi.org:443
 
