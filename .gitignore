@@ -56,3 +56,6 @@ pip-wheel-metadata/
 # pbr / setuptools
 .pbr/
 PKG-INFO
+
+# Pipfile.lock
+Pipfile.lock

@@ -1,0 +1,146 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+# Default to read-only. Each job overrides only what it needs.
+permissions:
+  contents: read
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────
+  # 1. Build a source distribution + pure-Python wheel.
+  #    The wheel is "highly portable" because casconf is pure Python
+  #    (no C extensions), so one wheel runs on any OS/arch/Python.
+  # ──────────────────────────────────────────────────────────────────
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e  # v2.14.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            files.pythonhosted.org:443
+            pypi.org:443
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Verify the wheel is pure-Python (no platform tag)
+        run: |
+          ls dist/
+          # A portable wheel's filename ends in -none-any.whl
+          if ! ls dist/*.whl | grep -q "none-any.whl"; then
+            echo "ERROR: wheel is not pure-Python / universal!"
+            exit 1
+          fi
+
+      # Upload as a workflow artifact so publish jobs can download it
+      # without re-building from source.  Both publish jobs consume the
+      # same artifact, guaranteeing they publish identical bytes.
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────
+  # 2. Publish to test.pypi.org for smoke-testing before going live.
+  # ──────────────────────────────────────────────────────────────────
+  publish-test-pypi:
+    name: Publish → Test PyPI
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Scoped environment lets you require manual approval in GitHub
+    # before this job runs (Settings → Environments → test-pypi).
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/project/casconf/
+
+    # Trusted Publisher (OIDC) — no long-lived API token stored in secrets.
+    # PyPI mints a short-lived token for this exact workflow run only.
+    permissions:
+      contents: read
+      id-token: write   # Required for OIDC token exchange
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e  # v2.14.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            test.pypi.org:443
+            upload.pypi.org:443
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to Test PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  # ──────────────────────────────────────────────────────────────────
+  # 3. Publish to pypi.org only after test.pypi.org succeeds.
+  # ──────────────────────────────────────────────────────────────────
+  publish-pypi:
+    name: Publish → PyPI
+    needs: publish-test-pypi
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/casconf/
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e  # v2.14.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            pypi.org:443
+            upload.pypi.org:443
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0

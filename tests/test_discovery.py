@@ -128,10 +128,12 @@ class TestEnvVarExpansionInPaths:
 
     def test_env_var_expansion_via_from_dict(self, monkeypatch, tmp_path):
         monkeypatch.setenv("CASCONF_TEST_DIR", str(tmp_path))
-        dc = DiscoveryConfig.from_dict({
-            "directories": ["$CASCONF_TEST_DIR"],
-            "patterns": ["*.json"],
-        })
+        dc = DiscoveryConfig.from_dict(
+            {
+                "directories": ["$CASCONF_TEST_DIR"],
+                "patterns": ["*.json"],
+            }
+        )
         assert dc.directories[0] == tmp_path
 
 

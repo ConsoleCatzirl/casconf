@@ -1,0 +1,80 @@
+name: Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Minimal permissions — GITHUB_TOKEN can only read repo contents.
+# Write access is not needed for running tests.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+
+    steps:
+      # Harden the runner: restrict egress to known-good domains only.
+      # This blocks any unexpected outbound calls (e.g. curl | bash payloads)
+      # even if a dependency or action is compromised.
+      - name: Harden runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e  # v2.14.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            files.pythonhosted.org:443
+            pypi.org:443
+
+      # Pin to a full commit SHA — not a mutable tag like @v4.
+      # Mutable tags can be silently poisoned (see: xygeni-action incident).
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pipenv and dependencies
+        run: |
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev --deploy
+
+      # Lint, format, import-order, and type checks are style/correctness
+      # checks that don't vary by Python version — run them once on the
+      # latest version only to avoid redundant failures across the matrix.
+      - name: Lint
+        if: matrix.python-version == '3.14'
+        run: pipenv run lint
+
+      - name: Check formatting
+        if: matrix.python-version == '3.14'
+        run: pipenv run format-check
+
+      - name: Check import sorting
+        if: matrix.python-version == '3.14'
+        run: pipenv run sort-imports-check
+
+      - name: Type check
+        if: matrix.python-version == '3.14'
+        run: pipenv run typecheck
+
+      # Tests with coverage run on every Python version in the matrix.
+      - name: Test with coverage
+        run: pipenv run test-cov
