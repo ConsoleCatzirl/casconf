@@ -135,6 +135,7 @@ jobs:
             pypi.org:443
             rekor.sigstore.dev:443
             tuf-repo-cdn.sigstore.dev:443
+            upload.pypi.org:443
 
       - name: Download dist artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
