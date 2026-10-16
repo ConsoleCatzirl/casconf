@@ -33,7 +33,7 @@ CasConf scans a configurable list of directories for matching configuration file
 ## Installation
 
 ```bash
-# From PyPI (when published)
+# From PyPI
 pip install casconf
 
 # From source
